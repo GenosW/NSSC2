@@ -39,6 +39,7 @@ double Solution(double x, double y)
 class Field
 {
 public:
+  MPI_Status stat;
   const Discretization disc;
   int N, DIM1, DIM2;
 
@@ -60,11 +61,11 @@ public:
 
     // allocate arrays
     int additionalLayer = 1;
-    if ( rank == 0 || rank == numproc-1 )
+    if ( mpi_rank == 0 || mpi_rank == mpi_numproc-1 )
         additionalLayer = 2;
 
     DIM1 = N;
-    DIM2 = N/numproc + additionalLayer;
+    DIM2 = N/mpi_numproc + additionalLayer;
     
 
     sol = std::vector<double>(DIM1 * DIM2, 0);
@@ -81,7 +82,7 @@ public:
         if (j == 0 || j == DIM2-1 || i == 0 || i == DIM1-1) // global domain boundary
           dom[i + DIM1 * j] = Cell::DIR;
 
-        if ( (j == 0 && rank != 0) || (j == DIM2-1 && rank != numproc-1)) // ghost layer
+        if ( (j == 0 && mpi_rank != 0) || (j == DIM2-1 && mpi_rank != mpi_numproc-1)) // ghost layer
           dom[i + DIM1 * j] = Cell::GHOST;
 
       }
@@ -96,7 +97,7 @@ public:
             dom[i + DIM1 * j] == Cell::DIR)
         {
           rhs[i + DIM1 * j] =
-              Solution(i * disc.h, (j+2*rank) * disc.h) * 4 * M_PI * M_PI;
+              Solution(i * disc.h, (j+mpi_rank*N/mpi_numproc-std::min(mpi_rank,1)) * disc.h) * 4 * M_PI * M_PI;
         }
       }
     }
@@ -109,9 +110,9 @@ public:
         if (dom[i + DIM1 * j] == Cell::DIR)
         {
           sol[i + DIM1 * j] =
-              Solution(i * disc.h, (j+2*rank) * disc.h);
+              Solution(i * disc.h, (j+mpi_rank*N/mpi_numproc-std::min(mpi_rank,1)) * disc.h);
           sol2[i + DIM1 * j] =
-              Solution(ig * disc.h, (j+2*rank) * disc.h);
+              Solution(i * disc.h, (j+mpi_rank*N/mpi_numproc-std::min(mpi_rank,1)) * disc.h);
         }
       }
     }
@@ -177,7 +178,7 @@ public:
         if (dom[i + DIM1 * j] == Cell::UNKNOWN)
         {
           double tmp = sol[i + +DIM1 * j] -
-                       Solution(i * disc.h, (j+2*rank) * disc.h);
+                       Solution(i * disc.h, (j+mpi_rank*N/mpi_numproc-std::min(mpi_rank,1)) * disc.h);
 
           max = fabs(tmp) > max ? fabs(tmp) : max;
           sum += tmp * tmp;
@@ -237,6 +238,39 @@ public:
       }
     }
     sol.swap(sol2);
+    
+    if (mpi_rank > 0)
+    {
+        double msg_upper[DIM1];
+        for (int i = 0; i < DIM1; ++i)
+            msg_upper[i] = sol[DIM1+i];
+        
+        MPI_Send(msg_upper, DIM1, MPI_DOUBLE, mpi_rank-1, 1, MPI_COMM_WORLD);
+    }
+    if (mpi_rank < mpi_numproc-1)
+    {
+        double rec_upper[DIM1];
+        MPI_Recv(rec_upper, DIM1, MPI_DOUBLE, mpi_rank+1, MPI_ANY_TAG, MPI_COMM_WORLD, &stat);
+        for (int i = 0; i < DIM1; ++i)
+            sol[(DIM2-1)*DIM1+i] = rec_upper[i];
+    }
+
+    if (mpi_rank < mpi_numproc-1)
+    {
+        double msg_lower[DIM1];
+        for (int i = 0; i < DIM1; ++i)
+            msg_lower[i] = sol[DIM1+i];
+        
+        MPI_Send(msg_lower, DIM1, MPI_DOUBLE, mpi_rank+1, 1, MPI_COMM_WORLD);
+    }
+    if (mpi_rank > 0)
+    {
+        double rec_lower[DIM1];
+        MPI_Recv(rec_lower, DIM1, MPI_DOUBLE, mpi_rank-1, MPI_ANY_TAG, MPI_COMM_WORLD, &stat);
+        for (int i = 0; i < DIM1; ++i)
+            sol[i] = rec_lower[i];
+    }
+
   };
 };
 
