@@ -1,4 +1,7 @@
-// #pragma once
+#pragma once
+#ifndef _USE_MATH_DEFINES
+  #define _USE_MATH_DEFINES
+#endif
 #include <array>
 #include <assert.h>
 #include <chrono>
@@ -53,37 +56,48 @@ public:
   ~Field(){ }
   Field(int N ,int rank, int numproc) : disc(N), N(N),mpi_rank(rank), mpi_numproc(numproc)
   {
-
-
     std::cout << "Rank " << mpi_rank << std::endl;
-    ;
 
     // allocate arrays
-    DIM1 = N + 2;
-    DIM2 = N + 2;
+    int additionalLayer = 1; // always at least 1 neighbor ==> at least 1 additional ghost layer
+    if ( mpi_rank == 0 || mpi_rank == mpi_numproc-1 ) // if not top or bot layer ==> 2 ghost layers
+        additionalLayer = 2;
+    int offset_j = int(disc.resolution/mpi_numproc); // numproc == "number of domains"
+    // Examples for offset calculation: -
+    // 1) example with resolution = 64, numproc = 4
+    // 64/4 = 16 ... should be offset
+
+    // 2) example with resolution = 64, numproc = 3
+    // 64/3 = 21.33333 ... should be offset
+    // int(64/3) = 21 --> use that as offset. consequence: highest rank will get slightly bigger domain (by 1 layer?) --> should still be okay?
+    // 3*21 = 63 --> 1 extra layer for highest rank
+
+    // 3) example with resolution = 256, numproc = 3
+    // 256/3 = 85.33333 ... should be offset
+    // int(25/3) = 85 --> use that as offset. consequence: highest rank will get slightly bigger domain (by 1 layer?) --> should still be okay?
+    // 3*85 = 255 --> 1 extra layer for highest rank  
+
+    DIM1 = disc.resolution; // 1 dimension stays undecomped
+    DIM2 = disc.resolution/mpi_numproc + additionalLayer; // how do we treat cases where (N/numproc) isn't integer?
+
     sol = std::vector<double>(DIM1 * DIM2, 0);
     sol2 = std::vector<double>(DIM1 * DIM2, 0);
     rhs = std::vector<double>(DIM1 * DIM2, 0);
-    dom = std::vector<int>(DIM1 * DIM2, Cell::GHOST);
+    dom = std::vector<int>(DIM1 * DIM2, Cell::UNKNOWN);
 
-    // setup domain
+    // setup domain, every point is innerDomain by default
     for (int j = 0; j != DIM2; ++j)
     {
       for (int i = 0; i != DIM1; ++i)
       {
-        const int ig = i - 1;
-        const int jg = j - 1;
-
-        if (jg > 0 && jg < N - 1 && ig > 0 && ig < N - 1) // inner domain
-          dom[i + DIM1 * j] = Cell::UNKNOWN;
-
-        if (jg == N - 1 || ig == N - 1 || jg == 0 ||
-            ig == 0) // global domain boundary
+        // (top    || bot         || left   || right      )
+        if (j == 0 || j == DIM2-1 || i == 0 || i == DIM1-1) // global domain boundary
           dom[i + DIM1 * j] = Cell::DIR;
 
-        if (jg < 0 || jg > N - 1 || ig < 0 ||
-            ig > N - 1) // ghost layer
+        // (top && not top domain) || (bot         && not bot domain)
+        if ( (j == 0 && mpi_rank != 0) || (j == DIM2-1 && mpi_rank != mpi_numproc-1)) // ghost layer
           dom[i + DIM1 * j] = Cell::GHOST;
+
       }
     }
 
@@ -95,10 +109,8 @@ public:
         if (dom[i + DIM1 * j] == Cell::UNKNOWN ||
             dom[i + DIM1 * j] == Cell::DIR)
         {
-          int ig = i - 1;
-          int jg = j - 1;
           rhs[i + DIM1 * j] =
-              Solution(ig * disc.h, jg * disc.h) * 4 * M_PI * M_PI;
+              Solution(i * disc.h, (j+offset_j) * disc.h) * 4 * M_PI * M_PI;
         }
       }
     }
@@ -110,12 +122,10 @@ public:
       {
         if (dom[i + DIM1 * j] == Cell::DIR)
         {
-          int ig = i - 1;
-          int jg = j - 1;
           sol[i + DIM1 * j] =
-              Solution(ig * disc.h, jg * disc.h);
+              Solution(i * disc.h, (j+offset_j) * disc.h);
           sol2[i + DIM1 * j] =
-              Solution(ig * disc.h, jg * disc.h);
+              Solution(i * disc.h, (j+offset_j) * disc.h);
         }
       }
     }
@@ -124,7 +134,6 @@ public:
   template <typename T>
   void printArray(std::vector<T> &v)
   {
-
     std::cout << std::defaultfloat;
     for (int j = 0; j != DIM2; ++j)
     {
@@ -132,6 +141,21 @@ public:
       {
         std::cout << v[i + DIM1 * j]
                   << ",";
+      }
+      std::cout << std::endl;
+    }
+    std::cout << std::defaultfloat;
+  }
+
+  void printDomain(std::vector<Cell> &v)
+  {
+    std::vector<char> symbol_list { 'x', '#', 'o'};
+    std::cout << std::defaultfloat;
+    for (int j = 0; j != DIM2; ++j)
+    {
+      for (int i = 0; i != DIM1; ++i)
+      {
+        std::cout << symbol_list[v[i + DIM1 * j]] << " ";
       }
       std::cout << std::endl;
     }
@@ -180,10 +204,8 @@ public:
       {
         if (dom[i + DIM1 * j] == Cell::UNKNOWN)
         {
-          int ig = i - 1;
-          int jg = j - 1;
           double tmp = sol[i + +DIM1 * j] -
-                       Solution(ig * disc.h, jg * disc.h);
+                       Solution(i * disc.h, (j+2*mpi_rank) * disc.h);
 
           max = fabs(tmp) > max ? fabs(tmp) : max;
           sum += tmp * tmp;
