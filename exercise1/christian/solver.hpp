@@ -39,7 +39,10 @@ double Solution(double x, double y)
 class Field
 {
 public:
+  
+  //#ifdef USEMPI
   MPI_Status stat;
+  //#endif
   const Discretization disc;
   int N, DIM1, DIM2;
 

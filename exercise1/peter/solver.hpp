@@ -9,6 +9,7 @@
 #include <functional>
 #include <iomanip>
 #include <iostream>
+#include <fstream>
 #include <limits>
 #include <thread>
 #include <vector>
@@ -53,16 +54,27 @@ public:
   int mpi_rank;
   int mpi_numproc;
 
-  ~Field(){ }
+  std::string filename;
+  std::ofstream out_file;
+
+  ~Field(){ out_file.close();}
   Field(int N ,int rank, int numproc) : disc(N), N(N),mpi_rank(rank), mpi_numproc(numproc)
   {
+    filename = "output_"+std::to_string(mpi_rank);
+    try {
+      out_file.open (filename, ios::out | ios::trunc);
+    }
+    catch (const ifstream::failure& e) {
+      cout << "Exception opening/reading file";
+      std::exit(1);
+    }   
     std::cout << "Rank " << mpi_rank << std::endl;
 
     // allocate arrays
     int additionalLayer = 1; // always at least 1 neighbor ==> at least 1 additional ghost layer
     if ( mpi_rank == 0 || mpi_rank == mpi_numproc-1 ) // if not top or bot layer ==> 2 ghost layers
         additionalLayer = 2;
-    int offset_j = int(disc.resolution/mpi_numproc); // numproc == "number of domains"
+    int offset_j = mpi_rank*int(disc.resolution/mpi_numproc); // numproc == "number of domains"
     // Examples for offset calculation: -
     // 1) example with resolution = 64, numproc = 4
     // 64/4 = 16 ... should be offset
