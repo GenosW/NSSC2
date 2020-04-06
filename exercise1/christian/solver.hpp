@@ -45,10 +45,7 @@ double Solution(double x, double y)
 class Field
 {
 public:
-  
-  //#ifdef USEMPI
   MPI_Status stat;
-  //#endif
   const Discretization disc;
   int N, DIM1, DIM2;
 
@@ -79,6 +76,8 @@ public:
     int additionalLayer = 2;
     if ( mpi_rank == 0 || mpi_rank == mpi_numproc-1 )
         additionalLayer = 1;
+    if (mpi_numproc == 1)
+        additionalLayer = 0;
 
     DIM1 = N;
     DIM2 = N/mpi_numproc + additionalLayer;
@@ -124,7 +123,7 @@ public:
       }
     }
 
-////////////////////////////////////////////////////////////////////////////////// setup initial solution on global boundary
+////////////////////////////////////////////////////////////////////////////////// setup initial solution on local boundary
 
     for (int j = 0; j != DIM2; ++j)
     {
@@ -139,6 +138,8 @@ public:
         }
       }
     }
+    string namesolution = "rank" + std::to_string(mpi_rank) + "_initialSolution.txt";
+    printSolution(sol, namesolution);
   }
 
 /////////////////////////////////////////////////////////////////////////////////// printArray
@@ -286,9 +287,8 @@ void error_global()
     double norm2 = sqrt(sum);
     double normMax = max;
 
-    std::cout << std::scientific << "norm2err " << norm2 << std::endl;
-    std::cout << std::scientific << "normMerr " << normMax << std::endl;
-    printArray(sol_global);
+    std::cout << std::scientific << "norm2err_global " << norm2 << std::endl;
+    std::cout << std::scientific << "normMerr_global " << normMax << std::endl;
 
     }
   };
@@ -314,7 +314,11 @@ void error_global()
 
         assemble_Original_Domain_and_Solution();
         if ( mpi_rank == 0)
+        {
             printDomain(dom_global,"GlobalDomain");
+            printSolution(sol_global, "GlobalSolution");
+        }
+        
 
         end = std::chrono::high_resolution_clock::now();
         runtime =
@@ -348,6 +352,7 @@ void error_global()
     }
     sol.swap(sol2);
     
+    
     if (mpi_rank > 0)
     {
         double msg_upper[DIM1];
@@ -368,7 +373,7 @@ void error_global()
     {
         double msg_lower[DIM1];
         for (int i = 0; i < DIM1; ++i)
-            msg_lower[i] = sol[DIM1+i];
+            msg_lower[i] = sol[DIM1*(DIM2-2)+i];
         
         MPI_Send(msg_lower, DIM1, MPI_DOUBLE, mpi_rank+1, 1, MPI_COMM_WORLD);
     }
@@ -379,6 +384,8 @@ void error_global()
         for (int i = 0; i < DIM1; ++i)
             sol[i] = rec_lower[i];
     }
+    string namesolution = "rank" + std::to_string(mpi_rank) + "_zwischenSolution.txt";
+    printSolution(sol, namesolution);
 
   };
 
@@ -386,7 +393,7 @@ void error_global()
 
     void assemble_Original_Domain_and_Solution()
     {
-        if (mpi_rank == 0)
+        if (mpi_rank == 0 )
         {
             printDomain(dom_global, "GlobalDomain");
             for(int i = 0; i < DIM1*N/mpi_numproc; ++i)
@@ -402,6 +409,7 @@ void error_global()
                 int additionalLayer = 2;
                 if ( i == mpi_numproc-1)
                     additionalLayer = 1;
+            
                 int rec_domain[DIM1*(N+additionalLayer)];
                 double rec_sol[DIM1*(N+additionalLayer)];
                 MPI_Recv(rec_domain, DIM1*(N+additionalLayer), MPI_INT, i, MPI_ANY_TAG, MPI_COMM_WORLD, &stat);
@@ -415,7 +423,7 @@ void error_global()
 
             }
         }
-        if (mpi_rank != 0)
+        if (mpi_rank != 0 )
         {
             string domainName = "GlobalPart" + std::to_string(mpi_rank) + ".txt";
             int send_domain[DIM1*DIM2];
@@ -429,6 +437,7 @@ void error_global()
             MPI_Send(send_domain, DIM1*DIM2, MPI_INT, 0, 1, MPI_COMM_WORLD);
             MPI_Send(send_sol, DIM1*DIM2, MPI_DOUBLE, 0, 1, MPI_COMM_WORLD);
         }
+        
 
     };
 
@@ -447,6 +456,27 @@ void error_global()
           for (int i = 0; i != DIM1; ++i)
           {
             outfile << symbol_list[v[i + DIM1 * j]] << " ";
+          }
+          outfile << std::endl;
+        }
+        outfile << std::defaultfloat;
+        outfile.close();
+      };
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////// print Solution
+
+void printSolution(std::vector<double> v, string name)
+      {
+        ofstream outfile;
+        outfile.open(name, ios::out | ios::trunc);
+        outfile << mpi_rank << endl << endl;
+        outfile << std::defaultfloat;
+        for (int j = 0; j != v.size()/N; ++j)
+        {
+            outfile << j + mpi_rank*N/mpi_numproc - min(mpi_rank,1) << "\t";
+          for (int i = 0; i != N; ++i)
+          {
+            outfile << v[i + N * j] << " ";
           }
           outfile << std::endl;
         }
