@@ -28,6 +28,8 @@ int main(int argc, char *argv[])
   assert(resolution > 3);
   auto field = Field(resolution,rank,numproc);
 
+  if (rank == 0)
+    std::cout << endl << "Starting calculation with resolution " << resolution << " and " << numproc << " processes" << endl; 
   field.solve(iterations);
   field.residual_global();
   field.error_global();

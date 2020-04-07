@@ -48,6 +48,7 @@ public:
   MPI_Status stat;
   const Discretization disc;
   int N, DIM1, DIM2;
+  bool debugmode = false;   // enable to get bunch of txt files describing subdomains, partial solutions etc.
 
   std::vector<double> sol;  // solution
   std::vector<double> sol2; // solution swap
@@ -70,7 +71,8 @@ public:
   {
 
     string name = "rank" + std::to_string(mpi_rank) + ".txt";
-    std::cout << "Rank " << mpi_rank << std::endl;
+    if (debugmode)
+        std::cout << "Rank " << mpi_rank << std::endl;
 
     // allocate arrays
     int additionalLayer = 2;
@@ -91,14 +93,14 @@ public:
     dom = std::vector<int>(DIM1 * DIM2, Cell::UNKNOWN);
     dom_global = std::vector<int>(N*N, Cell::UNKNOWN);
 
-////////////////////////////////////////////////////////////////////////// setup domain, every point is innerDomain by default
+////////////////////////////////////////////////////////////////////////// setup local domain, every point is innerDomain by default
 
     for (int j = 0; j != DIM2; ++j)
     {
       for (int i = 0; i != DIM1; ++i)
       {
 
-        if (j == 0 || j == DIM2-1 || i == 0 || i == DIM1-1) // global domain boundary
+        if (j == 0 || j == DIM2-1 || i == 0 || i == DIM1-1) // local domain boundary
           dom[i + DIM1 * j] = Cell::DIR;
 
         if ( (j == 0 && mpi_rank != 0) || (j == DIM2-1 && mpi_rank != mpi_numproc-1)) // ghost layer
@@ -106,9 +108,10 @@ public:
 
       }
     }
-    printDomain(dom,name);
+    if (debugmode)
+        printDomain(dom,name);
 
-////////////////////////////////////////////////////////////////////////////// init rhs
+////////////////////////////////////////////////////////////////////////////// init local rhs
 
     for (int j = 0; j != DIM2; ++j)
     {
@@ -138,8 +141,11 @@ public:
         }
       }
     }
-    string namesolution = "rank" + std::to_string(mpi_rank) + "_initialSolution.txt";
-    printSolution(sol, namesolution);
+    if (debugmode)
+    {
+        string namesolution = "rank" + std::to_string(mpi_rank) + "_initialSolution.txt";
+        printSolution(sol, namesolution);
+    }
   }
 
 /////////////////////////////////////////////////////////////////////////////////// printArray
@@ -161,7 +167,7 @@ public:
     std::cout << std::defaultfloat;
   }
 
-/////////////////////////////////////////////////////////////////////////////////// calculate residual
+/////////////////////////////////////////////////////////////////////////////////// calculate residual (not used)
 
   void residual()
   {
@@ -228,12 +234,13 @@ public:
     double norm2 = sqrt(sum);
     double normMax = max;
 
-    std::cout << std::scientific << "norm2res_gloabl " << norm2 << std::endl;
-    std::cout << std::scientific << "normMres_global " << normMax << std::endl;
+    std::cout << endl;
+    std::cout << std::scientific << "norm2res_gloabl: " << norm2 << std::endl;
+    std::cout << std::scientific << "normMres_global: " << normMax << std::endl;
     }
   };
 
-////////////////////////////////////////////////////////////////////////////////////////////// calculate error
+////////////////////////////////////////////////////////////////////////////////////////////// calculate error (not used)
 
   void error()
   {
@@ -287,8 +294,9 @@ void error_global()
     double norm2 = sqrt(sum);
     double normMax = max;
 
-    std::cout << std::scientific << "norm2err_global " << norm2 << std::endl;
-    std::cout << std::scientific << "normMerr_global " << normMax << std::endl;
+    std::cout << endl;
+    std::cout << std::scientific << "norm2err_global: " << norm2 << std::endl;
+    std::cout << std::scientific << "normMerr_global: " << normMax << std::endl;
 
     }
   };
@@ -299,35 +307,41 @@ void error_global()
 
   void solve(int iterations)
   {
+        
         std::chrono::time_point<std::chrono::high_resolution_clock> start;
         std::chrono::time_point<std::chrono::high_resolution_clock> end;
         double runtime;
 
-        start = std::chrono::high_resolution_clock::now();
+        if (mpi_rank == 0)
+            start = std::chrono::high_resolution_clock::now();
+        
 
         int iter;
         for (iter = 1; iter <= iterations; ++iter)
         {
           update();
-          // Synchronize ???
         }
 
         assemble_Original_Domain_and_Solution();
-        if ( mpi_rank == 0)
+        if ( mpi_rank == 0 && debugmode)
         {
             printDomain(dom_global,"GlobalDomain");
             printSolution(sol_global, "GlobalSolution");
         }
         
+        if (mpi_rank == 0)
+        {
+            end = std::chrono::high_resolution_clock::now();
+            runtime =
+                std::chrono::duration_cast<std::chrono::duration<double>>(end - start)
+                    .count();
 
-        end = std::chrono::high_resolution_clock::now();
-        runtime =
-            std::chrono::duration_cast<std::chrono::duration<double>>(end - start)
-                .count();
-
-        //std::cout << std::scientific << "iterations " << iterations << std::endl;
-        //std::cout << std::scientific << "runtime " << runtime << std::endl;
-        //std::cout << std::scientific << "runtime/iter " << runtime / iter << std::endl;
+            std::cout << endl;
+            std::cout << std::scientific << "iterations: " << iterations << std::endl;
+            std::cout << std::scientific << "runtime: " << runtime << std::endl;
+            std::cout << std::scientific << "runtime/iter: " << runtime / iter << std::endl;
+        }
+        
   }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////// update function 
@@ -384,8 +398,12 @@ void error_global()
         for (int i = 0; i < DIM1; ++i)
             sol[i] = rec_lower[i];
     }
-    string namesolution = "rank" + std::to_string(mpi_rank) + "_zwischenSolution.txt";
-    printSolution(sol, namesolution);
+
+    if (debugmode)
+    {
+        string namesolution = "rank" + std::to_string(mpi_rank) + "_zwischenSolution.txt";
+        printSolution(sol, namesolution);
+    }
 
   };
 
@@ -395,7 +413,9 @@ void error_global()
     {
         if (mpi_rank == 0 )
         {
-            printDomain(dom_global, "GlobalDomain");
+            if (debugmode)
+                printDomain(dom_global, "GlobalDomain");
+
             for(int i = 0; i < DIM1*N/mpi_numproc; ++i)
                 {
                     dom_global[i] = dom[i];
