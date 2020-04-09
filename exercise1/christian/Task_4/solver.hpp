@@ -40,6 +40,7 @@ double Solution(double x, double y)
 class Field
 {
 public:
+  MPI_Status stat;
   const Discretization disc;
   int resolution, DIM1, DIM2, M, N, m, n;
 
@@ -92,7 +93,8 @@ public:
     rhs = std::vector<double>(DIM1 * DIM2, 0);
     dom = std::vector<int>(DIM1 * DIM2, Cell::UNKNOWN);
 
-    // setup domain
+///////////////////////////////////////////////////////////////////////////////////////////// setup local domain
+
     for (int j = 0; j != DIM2; ++j)
     {
       for (int i = 0; i != DIM1; ++i)
@@ -105,39 +107,36 @@ public:
       }
     }
     printLocalDomain(name);
-/*
-    // init rhs
+
+////////////////////////////////////////////////////////////////////////////////////////////////// init local rhs
+
     for (int j = 0; j != DIM2; ++j)
     {
       for (int i = 0; i != DIM1; ++i)
       {
-        if (dom[i + DIM1 * j] == Cell::UNKNOWN ||
-            dom[i + DIM1 * j] == Cell::DIR)
+        if (dom[i + DIM1 * j] == Cell::UNKNOWN || dom[i + DIM1 * j] == Cell::DIR)
         {
-          int ig = i - 1;
-          int jg = j - 1;
           rhs[i + DIM1 * j] =
-              Solution(ig * disc.h, jg * disc.h) * 4 * M_PI * M_PI;
+              Solution(real_x(i) * disc.h, real_y(j) * disc.h) * 4 * M_PI * M_PI;
         }
       }
     }
 
-    // setup initial solution on global boundary
+///////////////////////////////////////////////////////////////////////////////////////////////////// setup initial solution on local boundary
+
     for (int j = 0; j != DIM2; ++j)
     {
       for (int i = 0; i != DIM1; ++i)
       {
         if (dom[i + DIM1 * j] == Cell::DIR)
         {
-          int ig = i - 1;
-          int jg = j - 1;
           sol[i + DIM1 * j] =
-              Solution(ig * disc.h, jg * disc.h);
+              Solution(real_x(i) * disc.h, real_y(j) * disc.h);
           sol2[i + DIM1 * j] =
-              Solution(ig * disc.h, jg * disc.h);
+              Solution(real_x(i) * disc.h, real_y(j) * disc.h);
         }
       }
-    }*/
+    }
   }
 
   template <typename T>
@@ -217,7 +216,7 @@ public:
     std::cout << std::scientific << "normMerr " << normMax << std::endl;
   };
 
-  // perform Jacobi Iteration, with optional skip range
+/////////////////////////////////////////////////////////////////////////////////////////////// perform Jacobi Iteration, with optional skip range
   void solve(int iterations)
   {
 
@@ -261,6 +260,75 @@ public:
       }
     }
     sol.swap(sol2);
+
+    ///////////////////////// vertical communication /////////////////////////////////
+
+    if (n > 0)
+    {
+        double msg_upper[DIM1];
+        for (int i = 0; i < DIM1; ++i)
+            msg_upper[i] = sol[DIM1+i];
+        
+        MPI_Send(msg_upper, DIM1, MPI_DOUBLE, (n-1)*M+m, 1, MPI_COMM_WORLD);
+    }
+    if (n < N-1)
+    {
+        double rec_upper[DIM1];
+        MPI_Recv(rec_upper, DIM1, MPI_DOUBLE, (n+1)*M+m, MPI_ANY_TAG, MPI_COMM_WORLD, &stat);
+        for (int i = 0; i < DIM1; ++i)
+            sol[(DIM2-1)*DIM1+i] = rec_upper[i];
+    }
+
+    if (n < N-1)
+    {
+        double msg_lower[DIM1];
+        for (int i = 0; i < DIM1; ++i)
+            msg_lower[i] = sol[DIM1*(DIM2-2)+i];
+        
+        MPI_Send(msg_lower, DIM1, MPI_DOUBLE, (n+1)*M+m, 1, MPI_COMM_WORLD);
+    }
+    if (n > 0)
+    {
+        double rec_lower[DIM1];
+        MPI_Recv(rec_lower, DIM1, MPI_DOUBLE, (n-1)*M+m, MPI_ANY_TAG, MPI_COMM_WORLD, &stat);
+        for (int i = 0; i < DIM1; ++i)
+            sol[i] = rec_lower[i];
+    }
+
+///////////////////////// horizontal communication /////////////////////////////////
+
+    if (m > 0)
+    {
+        double msg_left[DIM2];
+        for (int j = 0; j < DIM2; ++j)
+            msg_left[j] = sol[DIM1*j];
+        
+        MPI_Send(msg_left, DIM2, MPI_DOUBLE, n*M+m-1, 1, MPI_COMM_WORLD);
+    }
+    if (m < M-1)
+    {
+        double rec_left[DIM2];
+        MPI_Recv(rec_left, DIM2, MPI_DOUBLE, n*M+m+1, MPI_ANY_TAG, MPI_COMM_WORLD, &stat);
+        for (int j = 0; j < DIM2; ++j)
+            sol[(DIM1-2)+j*DIM1] = rec_left[j];
+    }
+
+    if (m < M-1)
+    {
+        double msg_right[DIM2];
+        for (int j = 0; j < DIM2; ++j)
+            msg_right[j] = sol[(DIM1-1)+j*DIM1];
+        
+        MPI_Send(msg_right, DIM2, MPI_DOUBLE, n*M+m+1, 1, MPI_COMM_WORLD);
+    }
+    if (m > 0)
+    {
+        double rec_right[DIM2];
+        MPI_Recv(rec_right, DIM2, MPI_DOUBLE, n*M+m-1, MPI_ANY_TAG, MPI_COMM_WORLD, &stat);
+        for (int j = 0; j < DIM2; ++j)
+            sol[j*DIM1] = rec_right[j];
+    }
+
   };
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////// factors for domain decomposition
@@ -315,7 +383,7 @@ public:
             }
       };
 
-////////////////////////////////////////////////////////////////////////////////////////////// print Domain
+////////////////////////////////////////////////////////////////////////////////////////////// print local Domain
 
 void printLocalDomain( string name)
       {
@@ -340,6 +408,7 @@ void printLocalDomain( string name)
         outfile << std::defaultfloat;
         outfile.close();   
       };
+
 
 ////////////////////////////////////////////////////////////////////////////////////////////////// real X and Y
 
