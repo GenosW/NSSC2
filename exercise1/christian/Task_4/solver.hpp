@@ -10,6 +10,7 @@
 #include <thread>
 #include <vector>
 #include <fstream>
+#include <numeric>
 
 namespace nssc
 {
@@ -44,13 +45,15 @@ public:
   const Discretization disc;
   int resolution, DIM1, DIM2, M, N, m, n;
 
-  std::vector<double> sol;  // solution
-  std::vector<double> sol2; // solution swap
-  std::vector<double> rhs;  // rhs
-  std::vector<int> dom;     // domaininfo
-  std::vector<double> sol_global;
-  std::vector<int> dom_global;
-  std::vector<double> rhs_global;
+  std::vector<double> sol;  // local solution
+  std::vector<double> sol2; // local solution swap
+  std::vector<double> rhs;  // local rhs
+  std::vector<int> dom;     // local domaininfo
+  std::vector<double> sol_global;   // global solution
+  std::vector<int> dom_global;      // global domaininfo
+  std::vector<double> rhs_global;   // global rhs
+  bool debugmode = false;           // enable to get a bunch of extra information about local domains, local solutions etc. in text files
+  string name;
 
   int mpi_rank;
   int mpi_numproc;
@@ -59,15 +62,19 @@ public:
   Field(int resolution ,int rank, int numproc) : disc(resolution), resolution(resolution), mpi_rank(rank), mpi_numproc(numproc)
   {
 
-
-    std::cout << "Rank " << mpi_rank << std::endl;
-    string name = "rank" + std::to_string(mpi_rank) + ".txt";
+    if(debugmode)
+    {
+        std::cout << "Rank " << mpi_rank << std::endl;
+        name = "local_Domain_rank" + std::to_string(mpi_rank) + ".txt";
+    }
 
     // allocate arrays
     M = 1;
     N = 1;
     factorization(mpi_numproc);
-    std::cout << M << N << endl;
+    if(mpi_rank == 0)
+        std::cout << endl << "Calculation of " << resolution << "x" << resolution << " Grid with " << mpi_numproc << " process(es)" << endl 
+        << "M: " << M << ", N: " << N << endl;
     m = mpi_rank%M;
     n = (mpi_rank-m)/M;
 
@@ -115,7 +122,8 @@ public:
           dom[i + DIM1 * j] = Cell::DIR;
       }
     }
-    printLocalDomain(name);
+    if(debugmode)
+        printLocalDomain(name);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////// init local rhs
 
@@ -130,8 +138,12 @@ public:
         }
       }
     }
-    name = "initialRhs" + std::to_string(mpi_rank) + ".txt";
-    printLocalRhs(name);
+    if(debugmode)
+    {
+     name = "initialRhs_rank_" + std::to_string(mpi_rank) + ".txt";
+     printLocalRhs(name);
+    }
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////// setup initial solution on local boundary
 
     for (int j = 0; j != DIM2; ++j)
@@ -147,9 +159,14 @@ public:
         }
       }
     }
-    name = "initialSolution" + std::to_string(mpi_rank) + ".txt";
-    printLocalSolution(name);
+    if(debugmode)
+    {
+        name = "initialSolution_rank_" + std::to_string(mpi_rank) + ".txt";
+        printLocalSolution(name);
+    }
   }
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////// printArray (not used)
 
   template <typename T>
   void printArray(std::vector<T> &v)
@@ -168,24 +185,27 @@ public:
     std::cout << std::defaultfloat;
   }
 
-  // calculate residual
-  void residual()
+/////////////////////////////////////////////////////////////////////////////////////// calculate residual global
+
+  void residual_global()
   {
+    if ( mpi_rank == 0)
+    {
     double max = 0;
     double sum = 0;
     int count = 0;
-    for (int j = 0; j != DIM2; ++j)
+    for (int j = 0; j != resolution; ++j)
     {
-      for (int i = 0; i != DIM1; ++i)
+      for (int i = 0; i != resolution; ++i)
       {
-        if (dom[i + DIM1 * j] == Cell::UNKNOWN)
+        if (dom_global[i + resolution * j] == Cell::UNKNOWN)
         {
-          double tmp = rhs[i + DIM1 * j] -
-                       (sol[(i + 0) + DIM1 * (j - 0)] * disc.C +
-                        sol[(i + 1) + DIM1 * (j - 0)] * disc.E +
-                        sol[(i - 1) + DIM1 * (j - 0)] * disc.W +
-                        sol[(i + 0) + DIM1 * (j - 1)] * disc.S +
-                        sol[(i + 0) + DIM1 * (j + 1)] * disc.N);
+          double tmp = Solution(i * disc.h, j * disc.h) * 4 * M_PI * M_PI -
+                       (sol_global[(i + 0) + resolution * (j - 0)] * disc.C +
+                        sol_global[(i + 1) + resolution * (j - 0)] * disc.E +
+                        sol_global[(i - 1) + resolution * (j - 0)] * disc.W +
+                        sol_global[(i + 0) + resolution * (j - 1)] * disc.S +
+                        sol_global[(i + 0) + resolution * (j + 1)] * disc.N);
 
           max = fabs(tmp) > max ? fabs(tmp) : max;
           sum += tmp * tmp;
@@ -197,23 +217,28 @@ public:
     double norm2 = sqrt(sum);
     double normMax = max;
 
-    std::cout << std::scientific << "norm2res " << norm2 << std::endl;
-    std::cout << std::scientific << "normMres " << normMax << std::endl;
+    std::cout << endl;
+    std::cout << std::scientific << "norm2res_gloabl: " << norm2 << std::endl;
+    std::cout << std::scientific << "normMres_global: " << normMax << std::endl;
+    }
   };
-  void error()
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////// calculate error global
+
+void error_global()
   {
+    if (mpi_rank == 0)
+    {
     double max = 0;
     double sum = 0;
-    for (int j = 0; j != DIM2; ++j)
+    for (int j = 0; j != resolution; ++j)
     {
-      for (int i = 0; i != DIM1; ++i)
+      for (int i = 0; i != resolution; ++i)
       {
-        if (dom[i + DIM1 * j] == Cell::UNKNOWN)
+        if (dom_global[i + resolution * j] == Cell::UNKNOWN)
         {
-          int ig = i - 1;
-          int jg = j - 1;
-          double tmp = sol[i + +DIM1 * j] -
-                       Solution(ig * disc.h, jg * disc.h);
+          double tmp = sol_global[i +resolution * j] -
+                       Solution(i * disc.h, j * disc.h);
 
           max = fabs(tmp) > max ? fabs(tmp) : max;
           sum += tmp * tmp;
@@ -224,11 +249,15 @@ public:
     double norm2 = sqrt(sum);
     double normMax = max;
 
-    std::cout << std::scientific << "norm2err " << norm2 << std::endl;
-    std::cout << std::scientific << "normMerr " << normMax << std::endl;
+    std::cout << endl;
+    std::cout << std::scientific << "norm2err_global: " << norm2 << std::endl;
+    std::cout << std::scientific << "normMerr_global: " << normMax << std::endl;
+
+    }
   };
 
 /////////////////////////////////////////////////////////////////////////////////////////////// perform Jacobi Iteration, with optional skip range
+
   void solve(int iterations)
   {
 
@@ -236,7 +265,8 @@ public:
     std::chrono::time_point<std::chrono::high_resolution_clock> end;
     double runtime;
 
-    start = std::chrono::high_resolution_clock::now();
+    if (mpi_rank == 0)
+        start = std::chrono::high_resolution_clock::now();
 
     int iter;
     for (iter = 1; iter <= iterations; ++iter)
@@ -246,14 +276,19 @@ public:
 
     assemble_Original_Domain_and_Solution();
 
-    end = std::chrono::high_resolution_clock::now();
-    runtime =
-        std::chrono::duration_cast<std::chrono::duration<double>>(end - start)
-            .count();
+    if (mpi_rank == 0)
+    {
+        end = std::chrono::high_resolution_clock::now();
+        runtime =
+            std::chrono::duration_cast<std::chrono::duration<double>>(end - start)
+                .count();
 
-    std::cout << std::scientific << "runtime " << runtime << std::endl;
-    std::cout << std::scientific << "runtime/iter " << runtime / iter << std::endl;
+        std::cout << endl << std::scientific << "runtime " << runtime << std::endl;
+        std::cout << std::scientific << "runtime/iter " << runtime / iter << std::endl;
+    }
   }
+
+//////////////////////////////////////////////////////////////////////////////////////////////// update local solution
 
   void update()
   {
@@ -309,7 +344,7 @@ public:
             sol[i] = rec_lower[i];
     }
 
-///////////////////////// horizontal communication /////////////////////////////////
+    ///////////////////////// horizontal communication /////////////////////////////////
 
     if (m > 0)
     {
@@ -343,8 +378,11 @@ public:
             sol[j*DIM1] = rec_right[j];
     }
 
-    string name = "localSolution" + std::to_string(mpi_rank) + ".txt";
-    printLocalSolution(name);
+    if(debugmode)
+    {
+        string name = "localSolution" + std::to_string(mpi_rank) + "__" + std::to_string(mpi_numproc) + ".txt";
+        printLocalSolution(name);
+    }
 
   };
 
@@ -354,13 +392,16 @@ public:
     {
         if (mpi_rank == 0 )
         {
-            printGlobalDomain("Globaldomain.txt");
 
-            for (int j = 0; j < DIM2-1; j++)
+            for (int j = 0; j < DIM2; j++)
             {
-                for (int i = 0; i < DIM1-1; i++)
+                for (int i = 0; i < DIM1; i++)
                 {
-                    dom_global[j*resolution+i] = dom[j*DIM1 + i];
+                    if (dom[j*DIM1 + i] != Cell::GHOST)
+                    {
+                        dom_global[j*resolution+i] = dom[j*DIM1 + i];
+                        sol_global[j*resolution+i] = sol[j*DIM1 + i];
+                    }
                 }
             }
             for(int k = 1; k < mpi_numproc; k++)
@@ -390,12 +431,13 @@ public:
                     DIM2p = (int)std::floor((double)resolution/N) + additionalLayer_Yp;
                 else
                     DIM2p = resolution - (int)std::floor((double)resolution/N)*(N-1) + additionalLayer_Yp;
-                std::cout << "Rank " << k << " mp: " << mp << " np: " << np << " DIM1p: " << DIM1p << " DIM2p: " << DIM2p << endl;
+                if(debugmode)
+                    std::cout << "Rank " << k << " mp: " << mp << " np: " << np << " DIM1p: " << DIM1p << " DIM2p: " << DIM2p << endl;
                 
                 int rec_domain[DIM1p*DIM2p];
-                //double rec_sol[DIM1*(N+additionalLayer)];
+                double rec_sol[DIM1p*DIM2p];
                 MPI_Recv(rec_domain, DIM1p*DIM2p, MPI_INT, k, MPI_ANY_TAG, MPI_COMM_WORLD, &stat);
-                //MPI_Recv(rec_sol, DIM1*(N+additionalLayer), MPI_DOUBLE, i, MPI_ANY_TAG, MPI_COMM_WORLD, &stat);
+                MPI_Recv(rec_sol, DIM1p*DIM2p, MPI_DOUBLE, k, MPI_ANY_TAG, MPI_COMM_WORLD, &stat);
 
                 for ( int j = 0; j < DIM2p; j++)
                 {
@@ -406,31 +448,37 @@ public:
                             global_x_coord = i + mp*(int)std::floor((double)resolution/(double)M) - min(mp,1);
                             global_y_coord = j + np*(int)std::floor((double)resolution/(double)N) - min(np,1);
                             dom_global[ global_y_coord*resolution + global_x_coord ] = rec_domain[j*DIM1p + i];
+                            sol_global[ global_y_coord*resolution + global_x_coord ] = rec_sol[j*DIM1p + i];
                         }
                     }
                 }
-                string zwischenname = "GlobalDomain" + std::to_string(k) + ".txt";
-                printGlobalDomain(zwischenname);
-
             }
-            
+            if(debugmode)
+            {
+                string gd = "GlobalDomain_" + std::to_string(mpi_numproc) + ".txt";
+                string gs = "GlobalSolution_" + std::to_string(mpi_numproc) + ".txt";
+                printGlobalDomain(gd);
+                printGlobalSolution(gs);
+            }
+                
         }
 
         if (mpi_rank != 0 )
         {
             int send_domain[DIM1*DIM2];
-            //double send_sol[DIM1*DIM2];
+            double send_sol[DIM1*DIM2];
 
             for ( int j = 0; j < DIM2; j++)
             {
                 for ( int i = 0; i < DIM1; i++)
                 {
                     send_domain[j*DIM1+i] = dom[j*DIM1+i];
+                    send_sol[j*DIM1+i] = sol[j*DIM1+i];
                 }
             }
 
             MPI_Send(send_domain, DIM1*DIM2, MPI_INT, 0, 1, MPI_COMM_WORLD);
-            //MPI_Send(send_sol, DIM1*DIM2, MPI_DOUBLE, 0, 1, MPI_COMM_WORLD);
+            MPI_Send(send_sol, DIM1*DIM2, MPI_DOUBLE, 0, 1, MPI_COMM_WORLD);
         }
         
 
@@ -489,7 +537,7 @@ public:
       };
 
 
-////////////////////////////////////////////////////////////////////////////////////////////// print global Domain
+////////////////////////////////////////////////////////////////////////////////////////////// print global Domain (debugging)
 
 void printGlobalDomain( string name)
       {
@@ -517,7 +565,7 @@ void printGlobalDomain( string name)
 
 
 
-////////////////////////////////////////////////////////////////////////////////////////////// print local Domain
+////////////////////////////////////////////////////////////////////////////////////////////// print local Domain (debugging)
 
 void printLocalDomain( string name)
       {
@@ -543,7 +591,7 @@ void printLocalDomain( string name)
         outfile.close();   
       };
 
-////////////////////////////////////////////////////////////////////////////////////////////// print local Solution
+////////////////////////////////////////////////////////////////////////////////////////////// print local Solution (debugging)
 
 void printLocalSolution( string name)
       {
@@ -568,7 +616,33 @@ void printLocalSolution( string name)
         outfile.close();   
       };
 
-////////////////////////////////////////////////////////////////////////////////////////////// print local Rhs
+
+////////////////////////////////////////////////////////////////////////////////////////////// print global Solution (debugging)
+
+void printGlobalSolution( string name)
+      {
+        ofstream outfile;
+        outfile.open(name, ios::out | ios::trunc);
+        outfile << "Rank " << mpi_rank << ", m: " << m << ", n: " << n << endl << endl;
+        outfile << "\t";
+        outfile << std::defaultfloat;
+        for (int i = 0; i < resolution; i++)
+            outfile << real_x(i) << "\t";
+        outfile << endl;
+        for (int j = 0; j < resolution; ++j)
+        {
+            outfile << real_y(j) << "\t";
+          for (int i = 0; i < resolution; ++i)
+          {
+            outfile << sol_global[i + resolution * j] << "\t";
+          }
+          outfile << std::endl;
+        }
+        outfile << std::defaultfloat;
+        outfile.close();   
+      };
+
+////////////////////////////////////////////////////////////////////////////////////////////// print local Rhs (debugging)
 
 void printLocalRhs( string name)
       {

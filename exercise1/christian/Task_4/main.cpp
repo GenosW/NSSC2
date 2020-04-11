@@ -28,9 +28,9 @@ int main(int argc, char *argv[])
   assert(resolution > 3);
   auto field = Field(resolution,rank,numproc);
 
-  //field.solve(iterations);
-  //field.residual();
-  //field.error();
+  field.solve(iterations);
+  field.residual_global();
+  field.error_global();
 
 #ifdef USEMPI
   MPI_Finalize();
