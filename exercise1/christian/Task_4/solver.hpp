@@ -73,7 +73,7 @@ public:
     N = 1;
     factorization(mpi_numproc);
     if(mpi_rank == 0)
-        std::cout << endl << "Calculation of " << resolution << "x" << resolution << " Grid with " << mpi_numproc << " process(es)" << endl 
+        std::cout << endl << "Calculation of " << resolution << "x" << resolution << " Grid with " << mpi_numproc << " process(es) using 2D decomposition" << endl 
         << "M: " << M << ", N: " << N << endl;
     m = mpi_rank%M;
     n = (mpi_rank-m)/M;
