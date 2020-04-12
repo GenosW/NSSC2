@@ -13,10 +13,10 @@ CXXFLAGS := $(CXXFLAGS) -std=c++14 -O3 -Wall -pedantic -march=native -ffast-math
 .DEFAULT_GOAL := all
  
 jacobiSERIAL: Makefile main.cpp solver.hpp arguments.hpp 
-	$(CXX) main.cpp -o jacobiSERIAL $(CXXFLAGS)
+	$(CXX) main.cpp -o build/jacobiSERIAL $(CXXFLAGS)
 
 jacobiMPI: Makefile main.cpp solver.hpp arguments.hpp
-	$(MPICXX) main.cpp -o jacobiMPI -lpthread -DUSEMPI $(CXXFLAGS)
+	$(MPICXX) main.cpp -o build/jacobiMPI -lpthread -DUSEMPI $(CXXFLAGS)
 
 .PHONY: clean
 

@@ -11,7 +11,10 @@
 #include <vector>
 #include <fstream>
 #include <numeric>
-
+//#ifdef USEMPI
+#include <mpi.h>
+//#include <mpi/mpi.h>
+//#endif
 namespace nssc
 {
 
@@ -76,6 +79,7 @@ public:
     m = mpi_rank%M;
     n = (mpi_rank-m)/M;
 
+    // Check how many additional (ghost) layers are needed per axis
     int additionalLayer_X = 2;
     int additionalLayer_Y = 2;
     if ( m == 0 || m == M-1 )
