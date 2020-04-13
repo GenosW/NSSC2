@@ -1,0 +1,225 @@
+\title{NSSC_Ex3}
+\date{December 2019}
+
+%\documentclass[preview,border=12pt,12pt]{standalone}
+\documentclass[11pt,a4paper]{article}
+%\usepackage{mathtools,comicsans}
+\usepackage[left=2.5cm,right=2cm, bottom=2cm]{geometry}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{amsfonts}
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage{subfigure}
+\usepackage{color}
+\usepackage{abstract}
+\usepackage{float}
+\usepackage[toc,page]{appendix}
+\usepackage{listings}
+\lstset{language=C++}
+
+
+\begin{document}
+%%%%%% Title page %%%%%%%%%%%%%%%
+\begin{titlepage}
+	\centering
+	\begin{center}
+	\includegraphics[width=6cm]{Bilder/IuE-Logo.png}
+	\end{center}
+	{\scshape\LARGE INSTITUTE OF MICROELECTRONICS\par}
+	\vspace{1cm}
+	{\scshape\Large NSSC2 - Exercise 1\par}
+	\vspace{1.5cm}
+	{\huge\bfseries Group ?\par}
+	\vspace{2cm}
+	Member:\par
+	{\Large\itshape Christian \textsc{Gollmann, 01435044}\par}
+	{\Large\itshape Peter \textsc{Holzner, 01426733}\par}
+	{\Large\itshape Alexander \textsc{Leitner, 01525882}\par}
+	\vspace{1.5cm}
+	Submission: \today\par
+	\vfill
+\end{titlepage}
+\tableofcontents 
+\thispagestyle{empty}
+\newpage
+\setcounter{page}{1}
+%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Task 1 - Questions}
+For symmetric positive definite matrices A, the A-norm of the error decreases monotonically with increasing iteration number. (1) One can observe this behaviour in our own implementation in figure 2. In exact arithmetic, the residual should hit it’s minimum after approximately n iterations, where n stands for the dimension of the solution vector x which is roughly 5500 in our case. This is as well shown in our plot in figure 1. After 5500, the residual experiences no significant changes anymore. After this point, the minimum is essentially reached. The oscillations that can be observed afterwards are results of the numerical discretization and finite resolution inherent to computer precision. In general, it can be assumed that the minimum point is not exactly represented in the floating point representation of the computer.
+\par
+Note that for readability reasons, we only plotted every 50th value. Please take into account, that the existing data files will be overwritten once the program is executed and will therefore not deliver the same plots as below when called by the python script. However, a backup containing the data for a run with 10000 iterations is provided in the subfolder $"./Abgabe_1/data_10000it/”$.
+
+
+\newpage
+\section{Task 2 - 1D decomposition}
+
+\newpage
+\section{Task 3 - 1D decomposition}
+
+\newpage
+\section{Task 4 - 1D decomposition}
+
+\end{document}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+In Task 2, we were quite surprised that the preconditioned methods worked so well since they both don’t work with the exact matrix A like we do in our own implementation. The diagonally preconditioned method only takes the diagonal entries into account and the incomplete Cholesky method is “only” an approximation to the Cholesky factorization itself. Nevertheless, both methods gave similar or better results compared to our own implementation. What is quite remarkable as well is the difference in execution time. Our implementation took 4375 seconds to execute 10000 iterations. The diagonally preconditioned Eigen method delivered a similar (slightly better) result in 5 seconds which makes it faster by a factor of 875. 
+Note that for readability reasons, we only plotted every 20th value. Please consider, that the existing data files will be overwritten once the program is executed and will therefore not deliver the same plots as below when called by the python script. However, backups containing the data files for runs with 10000 iterations is provided in the subfolder $"./Abgabe_2/backup_10000it/”$.
+%% FIGURES
+\newpage
+\section{Monte Carlo Integration}
+The main task in this exercise is to implement a numerical integration for a one-dimensional function $f(x) \rightarrow y$ using a Monte Carlo technique.
+\begin{align}
+I = \int_a^b f(x)\, dx\,\,\, \approx\,\,\, \frac{1}{N} \sum_{i=1}^N f(\epsilon_i)
+\end{align}
+Where $\epsilon_i$ $i=1,2...N$ consist out of random numbers in the range of $(a,b)$. An easier way to impliment the random numbers is to transform the lower and the upper bounded of the integral from $(a,b)$ to $(0,1)$.
+\subsection{Transformation}
+The first integral is defined by:
+\begin{align}
+I_1 = \int_a^b \sin(x)\, dx
+\end{align}
+with a simple substantiation by $u = \frac{x-a}{b-a}$ we could rewrite (2) into a different boundary.
+\begin{align}
+I_1 \approx \frac{b-a}{N} \sum_{i=1}^N \sin(\epsilon_i(b-a)+a)
+\end{align}
+The second integral is defined by: 
+\begin{align}
+I_2 = \int_a^b \sin^2\bigg(\frac{1}{x}\bigg)\, dx
+\end{align}
+and now we could rewrite (4) as described upper.
+\begin{align}
+I_2 \approx \frac{b-a}{N} \sum_{i=1}^N \sin^2\bigg(\frac{1}{\epsilon_i(b-a)+a}\bigg)
+\end{align}
+The third integral is defined by: 
+\begin{align}
+I_2 = \int_a^b x^3\, dx
+\end{align}
+and now we could rewrite (4) as described upper.
+\begin{align}
+I_3 \approx \frac{b-a}{N} \sum_{i=1}^N \bigg(\epsilon_i(b-a)+a\bigg)^3
+\end{align}
+\subsection{Random number generator}
+The sequence to evaluate our random numbers $\epsilon_i$ is build up like. First we define a $MASTER$ random generator with a fixes given seed. With this generator the other seeds were define for each thread that we have to use. These seeds are stored in an array with the length of the numbers of threads. Every thread have to generate his own $N$ numbers of random numbers.
+
+\newpage
+\section{Parallel Jacobi Solver}
+\subsection{About our implementation}
+Goal: Parallelize your Jacobi solver developed in Exercise 2 using OpenMP.
+In particular, you should identify the for loops eligible for OpenMP parallelization and discuss
+your choice and adopt the implementation of Exercise 2 so that not a fixed number of
+iterations is performed, but instead the program stops the iterations once
+the runtime exceeds 10 seconds
+make your program callable by:
+\begin{lstlisting}
+./stencilomp resolution numthreads e.g.
+./stencilomp 64 4
+\end{lstlisting}
+where $resolution$ defines the grid spacing (same as in Exercise 2) and $numthreads$ referring to the number of OpenMP threads to be used and print the number of performed iterations, the total runtime of the iteration loop, and the average runtime per iteration to the terminal.\par
+
+The loop that is eligible for parallelization is the innermost loop which calculates the next iteration of the grid (vector), here called $xkp1$.
+In the following, we present the relevant snippet of our code which can be found in full in the file $stenciljacobi.cpp$.
+\begin{lstlisting}
+// Begin code snippet
+// chunk size is set in main and passed to the function
+chunk = int(double(vec_size)/threads); 
+...
+int jacobiMethod(...){ // Implementation of the jacobi method as a function
+...
+    for (size_t iteration = 0; iteration < maxIter; iteration++)
+    {
+        #pragma omp parallel for schedule(static, chunk) 
+        shared(b,xk,xkp1)
+        firstprivate(innerLen,aij,daii,vec_size)
+        for (size_t i = 0; i < vec_size; i++) // i is index of vector
+        {
+            double temp = 0.0;
+            if (i>innerLen-1)
+            {
+                temp = temp - xk[i-innerLen];
+            }
+            if (i>0 && i%innerLen!=0)
+            {
+                temp = temp - xk[i-1]; //left of diag
+            }
+            if (i<(vec_size-1) && (i+1)%innerLen!=0)
+            {
+                temp = temp - xk[i+1]; //right of diag
+            }
+            if (i<vec_size-(innerLen))
+            {
+                temp = temp - xk[i+innerLen];
+            }
+            xkp1[i] = (temp*aij + b[i])*daii;
+        }
+        xk.swap(xkp1);
+        runtime = omp_get_wtime() - t0;
+        stop = runtime > maxTime_s;
+        if (stop)
+        {
+            iterationsDone = iteration+1;
+            break;
+        }
+    }
+}
+// End code snippet
+\end{lstlisting}
+When one compares the (single thread) performance of our code to the reference version, it becomes immediately obvious that our version is comparatively slow.
+The slower performance is explained by our approach to the storage of the grid.
+We only store the inner grid points of the domain in a std::vector and therefore have to be careful when the stencil would include elements from the boundary of the domain.
+This is done via four if-checks in the inner most for loop.
+The boundary terms are taken of by including them in the right hand side vector of the equation.
+For a more in depth explanation, see our submission for exercise 2.\par
+A better performing variant is realized in the reference implementation where the whole grid (including the boundary points) are stored in one std::vector.
+The inner most loop(s) for calculating the next iteration of the Jacobi method then only loops over the inner points and leaves the boundary points as they are.
+The main advantage of this method are that it does not require the four if-checks and thus needs $4*(resolution-2)^2$ operations (roughly speaking) less per iteration.
+Additionally, we believe that the if-checks might also (partially) break data locality compared to the reference implementation.
+However, our implementation will also use $2*4*(resolution-1)$ elements of $double$ less memory.
+The first $2$ represents the grid and right hand side vector, the $4*(resolution-1)$ represents the number of elements needed to store the boundary.\par
+Keeping the non-optimized state of our implementation in mind, we will now move onto the parallelization and scalability analysis.
+
+\subsection{Parallelization and scalability analysis}
+
+Goal: Investigate the scalability and the parallelization by plotting the speedup of the average iteration runtime for 1, 2, 4, 8, 10, 20 and 40 threads on the cluster for three different OpenMP scheduling policies for the parallelized loop: schedule(static), schedule(static,1), schedule(dynamic)
+Plot and discuss the results for resolutions 256, 512, 1024, and 2048.\par
+Static und dynamci policy sind fast gleich gut (außer dann bei 40 threads)
+% figures
+\begin{figure}[H]
+\begin{center}
+\includegraphics[width=16cm]{Bilder/Task4/reso256.png}
+\caption{I am a capture with $resolution=256$}
+\end{center}
+\end{figure}
+\begin{figure}[H]
+\begin{center}
+\includegraphics[width=16cm]{Bilder/Task4/reso512.png}
+\caption{I am a capture with $resolution=512$}
+\end{center}
+\end{figure}
+\begin{figure}[H]
+\begin{center}
+\includegraphics[width=16cm]{Bilder/Task4/reso1024.png}
+\caption{I am a capture with $resolution=1024$}
+\end{center}
+\end{figure}
+\begin{figure}[H]
+\begin{center}
+\includegraphics[width=16cm]{Bilder/Task4/reso2048.png}
+\caption{I am a capture with $resolution=2048$}
+\end{center}
+\end{figure}
+ 
