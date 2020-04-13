@@ -1,0 +1,409 @@
+/usr/bin/sinfo
+
+Calculation of 2000x2000 Grid with 1 process(es) using 1D decomposition
+
+runtime 4.722852e+01
+runtime/iter 9.443816e-03
+
+norm2res_gloabl: 5.152251e+07
+normMres_global: 2.076494e+05
+
+norm2err_global: 8.770367e+04
+normMerr_global: 1.812452e+02
+
+Calculation of 2000x2000 Grid with 2 process(es) using 1D decomposition
+srun: error: tcad37: tasks 0-1: Segmentation fault (core dumped)
+
+Calculation of 2000x2000 Grid with 3 process(es) using 1D decomposition
+srun: error: tcad37: tasks 0-2: Segmentation fault (core dumped)
+
+Calculation of 2000x2000 Grid with 4 process(es) using 1D decomposition
+srun: error: tcad37: tasks 0-3: Segmentation fault (core dumped)
+
+Calculation of 2000x2000 Grid with 5 process(es) using 1D decomposition
+srun: error: tcad37: tasks 0-4: Segmentation fault (core dumped)
+
+Calculation of 2000x2000 Grid with 6 process(es) using 1D decomposition
+
+runtime 9.060979e+00
+runtime/iter 1.811833e-03
+
+norm2res_gloabl: 5.152251e+07
+normMres_global: 2.076494e+05
+
+norm2err_global: 8.770367e+04
+normMerr_global: 1.812452e+02
+
+Calculation of 2000x2000 Grid with 7 process(es) using 1D decomposition
+
+runtime 7.836675e+00
+runtime/iter 1.567022e-03
+
+norm2res_gloabl: 5.152251e+07
+normMres_global: 2.076494e+05
+
+norm2err_global: 8.770367e+04
+normMerr_global: 1.812452e+02
+
+Calculation of 2000x2000 Grid with 8 process(es) using 1D decomposition
+
+runtime 7.669500e+00
+runtime/iter 1.533593e-03
+
+norm2res_gloabl: 5.152251e+07
+normMres_global: 2.076494e+05
+
+norm2err_global: 8.770367e+04
+normMerr_global: 1.812452e+02
+
+Calculation of 2000x2000 Grid with 9 process(es) using 1D decomposition
+
+runtime 6.351952e+00
+runtime/iter 1.270136e-03
+
+norm2res_gloabl: 5.152251e+07
+normMres_global: 2.076494e+05
+
+norm2err_global: 8.770367e+04
+normMerr_global: 1.812452e+02
+
+Calculation of 2000x2000 Grid with 10 process(es) using 1D decomposition
+
+runtime 6.342868e+00
+runtime/iter 1.268320e-03
+
+norm2res_gloabl: 5.152251e+07
+normMres_global: 2.076494e+05
+
+norm2err_global: 8.770367e+04
+normMerr_global: 1.812452e+02
+
+Calculation of 2000x2000 Grid with 11 process(es) using 1D decomposition
+
+runtime 6.903005e+00
+runtime/iter 1.380325e-03
+
+norm2res_gloabl: 5.152251e+07
+normMres_global: 2.076494e+05
+
+norm2err_global: 8.770367e+04
+normMerr_global: 1.812452e+02
+
+Calculation of 2000x2000 Grid with 12 process(es) using 1D decomposition
+
+runtime 7.480176e+00
+runtime/iter 1.495736e-03
+
+norm2res_gloabl: 5.152251e+07
+normMres_global: 2.076494e+05
+
+norm2err_global: 8.770367e+04
+normMerr_global: 1.812452e+02
+
+Calculation of 2000x2000 Grid with 13 process(es) using 1D decomposition
+
+runtime 5.164469e+00
+runtime/iter 1.032687e-03
+
+norm2res_gloabl: 5.152251e+07
+normMres_global: 2.076494e+05
+
+norm2err_global: 8.770367e+04
+normMerr_global: 1.812452e+02
+
+Calculation of 2000x2000 Grid with 14 process(es) using 1D decomposition
+
+runtime 7.873797e+00
+runtime/iter 1.574444e-03
+
+norm2res_gloabl: 5.152251e+07
+normMres_global: 2.076494e+05
+
+norm2err_global: 8.770367e+04
+normMerr_global: 1.812452e+02
+
+Calculation of 2000x2000 Grid with 15 process(es) using 1D decomposition
+
+runtime 7.202296e+00
+runtime/iter 1.440171e-03
+
+norm2res_gloabl: 5.152251e+07
+normMres_global: 2.076494e+05
+
+norm2err_global: 8.770367e+04
+normMerr_global: 1.812452e+02
+
+Calculation of 2000x2000 Grid with 16 process(es) using 1D decomposition
+
+runtime 7.799489e+00
+runtime/iter 1.559586e-03
+
+norm2res_gloabl: 5.152251e+07
+normMres_global: 2.076494e+05
+
+norm2err_global: 8.770367e+04
+normMerr_global: 1.812452e+02
+
+Calculation of 2000x2000 Grid with 17 process(es) using 1D decomposition
+
+runtime 6.572804e+00
+runtime/iter 1.314298e-03
+
+norm2res_gloabl: 5.152251e+07
+normMres_global: 2.076494e+05
+
+norm2err_global: 8.770367e+04
+normMerr_global: 1.812452e+02
+
+Calculation of 2000x2000 Grid with 18 process(es) using 1D decomposition
+
+runtime 7.423211e+00
+runtime/iter 1.484345e-03
+
+norm2res_gloabl: 5.152251e+07
+normMres_global: 2.076494e+05
+
+norm2err_global: 8.770367e+04
+normMerr_global: 1.812452e+02
+
+Calculation of 2000x2000 Grid with 19 process(es) using 1D decomposition
+
+runtime 7.664422e+00
+runtime/iter 1.532578e-03
+
+norm2res_gloabl: 5.152251e+07
+normMres_global: 2.076494e+05
+
+norm2err_global: 8.770367e+04
+normMerr_global: 1.812452e+02
+
+Calculation of 2000x2000 Grid with 20 process(es) using 1D decomposition
+
+runtime 7.358442e+00
+runtime/iter 1.471394e-03
+
+norm2res_gloabl: 5.152251e+07
+normMres_global: 2.076494e+05
+
+norm2err_global: 8.770367e+04
+normMerr_global: 1.812452e+02
+
+Calculation of 2000x2000 Grid with 21 process(es) using 1D decomposition
+
+runtime 7.155508e+00
+runtime/iter 1.430815e-03
+
+norm2res_gloabl: 5.152251e+07
+normMres_global: 2.076494e+05
+
+norm2err_global: 8.770367e+04
+normMerr_global: 1.812452e+02
+
+Calculation of 2000x2000 Grid with 22 process(es) using 1D decomposition
+
+runtime 7.369418e+00
+runtime/iter 1.473589e-03
+
+norm2res_gloabl: 5.152251e+07
+normMres_global: 2.076494e+05
+
+norm2err_global: 8.770367e+04
+normMerr_global: 1.812452e+02
+
+Calculation of 2000x2000 Grid with 23 process(es) using 1D decomposition
+
+runtime 7.323938e+00
+runtime/iter 1.464495e-03
+
+norm2res_gloabl: 5.152251e+07
+normMres_global: 2.076494e+05
+
+norm2err_global: 8.770367e+04
+normMerr_global: 1.812452e+02
+
+Calculation of 2000x2000 Grid with 24 process(es) using 1D decomposition
+
+runtime 7.013775e+00
+runtime/iter 1.402475e-03
+
+norm2res_gloabl: 5.152251e+07
+normMres_global: 2.076494e+05
+
+norm2err_global: 8.770367e+04
+normMerr_global: 1.812452e+02
+
+Calculation of 2000x2000 Grid with 25 process(es) using 1D decomposition
+
+runtime 4.541099e+00
+runtime/iter 9.080382e-04
+
+norm2res_gloabl: 5.152251e+07
+normMres_global: 2.076494e+05
+
+norm2err_global: 8.770367e+04
+normMerr_global: 1.812452e+02
+
+Calculation of 2000x2000 Grid with 26 process(es) using 1D decomposition
+
+runtime 5.187694e+00
+runtime/iter 1.037331e-03
+
+norm2res_gloabl: 5.152251e+07
+normMres_global: 2.076494e+05
+
+norm2err_global: 8.770367e+04
+normMerr_global: 1.812452e+02
+
+Calculation of 2000x2000 Grid with 27 process(es) using 1D decomposition
+
+runtime 6.062873e+00
+runtime/iter 1.212332e-03
+
+norm2res_gloabl: 5.152251e+07
+normMres_global: 2.076494e+05
+
+norm2err_global: 8.770367e+04
+normMerr_global: 1.812452e+02
+
+Calculation of 2000x2000 Grid with 28 process(es) using 1D decomposition
+
+runtime 4.260035e+00
+runtime/iter 8.518366e-04
+
+norm2res_gloabl: 5.152251e+07
+normMres_global: 2.076494e+05
+
+norm2err_global: 8.770367e+04
+normMerr_global: 1.812452e+02
+
+Calculation of 2000x2000 Grid with 29 process(es) using 1D decomposition
+
+runtime 5.055137e+00
+runtime/iter 1.010825e-03
+
+norm2res_gloabl: 5.152251e+07
+normMres_global: 2.076494e+05
+
+norm2err_global: 8.770367e+04
+normMerr_global: 1.812452e+02
+
+Calculation of 2000x2000 Grid with 30 process(es) using 1D decomposition
+
+runtime 4.385324e+00
+runtime/iter 8.768894e-04
+
+norm2res_gloabl: 5.152251e+07
+normMres_global: 2.076494e+05
+
+norm2err_global: 8.770367e+04
+normMerr_global: 1.812452e+02
+
+Calculation of 2000x2000 Grid with 31 process(es) using 1D decomposition
+
+runtime 5.405713e+00
+runtime/iter 1.080926e-03
+
+norm2res_gloabl: 5.152251e+07
+normMres_global: 2.076494e+05
+
+norm2err_global: 8.770367e+04
+normMerr_global: 1.812452e+02
+
+Calculation of 2000x2000 Grid with 32 process(es) using 1D decomposition
+
+runtime 4.592261e+00
+runtime/iter 9.182685e-04
+
+norm2res_gloabl: 5.152251e+07
+normMres_global: 2.076494e+05
+
+norm2err_global: 8.770367e+04
+normMerr_global: 1.812452e+02
+
+Calculation of 2000x2000 Grid with 33 process(es) using 1D decomposition
+
+runtime 4.972513e+00
+runtime/iter 9.943037e-04
+
+norm2res_gloabl: 5.152251e+07
+normMres_global: 2.076494e+05
+
+norm2err_global: 8.770367e+04
+normMerr_global: 1.812452e+02
+
+Calculation of 2000x2000 Grid with 34 process(es) using 1D decomposition
+
+runtime 5.151952e+00
+runtime/iter 1.030184e-03
+
+norm2res_gloabl: 5.152251e+07
+normMres_global: 2.076494e+05
+
+norm2err_global: 8.770367e+04
+normMerr_global: 1.812452e+02
+
+Calculation of 2000x2000 Grid with 35 process(es) using 1D decomposition
+
+runtime 5.460948e+00
+runtime/iter 1.091971e-03
+
+norm2res_gloabl: 5.152251e+07
+normMres_global: 2.076494e+05
+
+norm2err_global: 8.770367e+04
+normMerr_global: 1.812452e+02
+
+Calculation of 2000x2000 Grid with 36 process(es) using 1D decomposition
+
+runtime 4.831758e+00
+runtime/iter 9.661584e-04
+
+norm2res_gloabl: 5.152251e+07
+normMres_global: 2.076494e+05
+
+norm2err_global: 8.770367e+04
+normMerr_global: 1.812452e+02
+
+Calculation of 2000x2000 Grid with 37 process(es) using 1D decomposition
+
+runtime 4.797952e+00
+runtime/iter 9.593985e-04
+
+norm2res_gloabl: 5.152251e+07
+normMres_global: 2.076494e+05
+
+norm2err_global: 8.770367e+04
+normMerr_global: 1.812452e+02
+
+Calculation of 2000x2000 Grid with 38 process(es) using 1D decomposition
+
+runtime 4.817396e+00
+runtime/iter 9.632865e-04
+
+norm2res_gloabl: 5.152251e+07
+normMres_global: 2.076494e+05
+
+norm2err_global: 8.770367e+04
+normMerr_global: 1.812452e+02
+
+Calculation of 2000x2000 Grid with 39 process(es) using 1D decomposition
+
+runtime 4.500726e+00
+runtime/iter 8.999651e-04
+
+norm2res_gloabl: 5.152251e+07
+normMres_global: 2.076494e+05
+
+norm2err_global: 8.770367e+04
+normMerr_global: 1.812452e+02
+
+Calculation of 2000x2000 Grid with 40 process(es) using 1D decomposition
+
+runtime 2.134386e+00
+runtime/iter 4.267919e-04
+
+norm2res_gloabl: 5.152251e+07
+normMres_global: 2.076494e+05
+
+norm2err_global: 8.770367e+04
+normMerr_global: 1.812452e+02

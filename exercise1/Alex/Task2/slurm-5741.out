@@ -1,0 +1,122 @@
+/usr/bin/sinfo
+
+Calculation of 250x250 Grid with 1 process(es) using 1D decomposition
+
+runtime 1.355218e+00
+runtime/iter 1.355082e-04
+
+norm2res_gloabl: 1.179136e+04
+normMres_global: 1.106307e+02
+
+norm2err_global: 1.261691e+02
+normMerr_global: 1.128686e+00
+
+Calculation of 250x250 Grid with 2 process(es) using 1D decomposition
+
+runtime 7.103552e-01
+runtime/iter 7.102841e-05
+
+norm2res_gloabl: 1.179136e+04
+normMres_global: 1.106307e+02
+
+norm2err_global: 1.261691e+02
+normMerr_global: 1.128686e+00
+
+Calculation of 250x250 Grid with 3 process(es) using 1D decomposition
+
+runtime 4.835637e-01
+runtime/iter 4.835153e-05
+
+norm2res_gloabl: 1.179136e+04
+normMres_global: 1.106307e+02
+
+norm2err_global: 1.261691e+02
+normMerr_global: 1.128686e+00
+
+Calculation of 250x250 Grid with 4 process(es) using 1D decomposition
+
+runtime 3.706202e-01
+runtime/iter 3.705832e-05
+
+norm2res_gloabl: 1.179136e+04
+normMres_global: 1.106307e+02
+
+norm2err_global: 1.261691e+02
+normMerr_global: 1.128686e+00
+
+Calculation of 250x250 Grid with 8 process(es) using 1D decomposition
+
+runtime 2.402415e-01
+runtime/iter 2.402175e-05
+
+norm2res_gloabl: 1.179136e+04
+normMres_global: 1.106307e+02
+
+norm2err_global: 1.261691e+02
+normMerr_global: 1.128686e+00
+
+Calculation of 250x250 Grid with 10 process(es) using 1D decomposition
+
+runtime 2.203054e-01
+runtime/iter 2.202834e-05
+
+norm2res_gloabl: 1.179136e+04
+normMres_global: 1.106307e+02
+
+norm2err_global: 1.261691e+02
+normMerr_global: 1.128686e+00
+
+Calculation of 250x250 Grid with 12 process(es) using 1D decomposition
+
+runtime 1.916174e-01
+runtime/iter 1.915982e-05
+
+norm2res_gloabl: 1.179136e+04
+normMres_global: 1.106307e+02
+
+norm2err_global: 1.261691e+02
+normMerr_global: 1.128686e+00
+
+Calculation of 250x250 Grid with 14 process(es) using 1D decomposition
+
+runtime 3.348249e-01
+runtime/iter 3.347914e-05
+
+norm2res_gloabl: 1.179136e+04
+normMres_global: 1.106307e+02
+
+norm2err_global: 1.261691e+02
+normMerr_global: 1.128686e+00
+
+Calculation of 250x250 Grid with 16 process(es) using 1D decomposition
+
+runtime 2.923972e-01
+runtime/iter 2.923679e-05
+
+norm2res_gloabl: 1.179136e+04
+normMres_global: 1.106307e+02
+
+norm2err_global: 1.261691e+02
+normMerr_global: 1.128686e+00
+
+Calculation of 250x250 Grid with 18 process(es) using 1D decomposition
+
+runtime 3.349579e-01
+runtime/iter 3.349244e-05
+
+norm2res_gloabl: 1.179136e+04
+normMres_global: 1.106307e+02
+
+norm2err_global: 1.261691e+02
+normMerr_global: 1.128686e+00
+
+Calculation of 250x250 Grid with 20 process(es) using 1D decomposition
+
+runtime 1.772267e-01
+runtime/iter 1.772090e-05
+
+norm2res_gloabl: 1.179136e+04
+normMres_global: 1.106307e+02
+
+norm2err_global: 1.261691e+02
+normMerr_global: 1.128686e+00

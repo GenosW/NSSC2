@@ -1,0 +1,56 @@
+/usr/bin/sinfo
+
+Calculation of 1000x1000 Grid with 2 process(es) using 1D decomposition
+
+runtime 5.638581e+00
+runtime/iter 1.127491e-03
+
+norm2res_gloabl: 9.135771e+06
+normMres_global: 5.111120e+04
+
+norm2err_global: 3.462112e+04
+normMerr_global: 1.273557e+02
+
+Calculation of 1000x1000 Grid with 3 process(es) using 1D decomposition
+
+runtime 3.910048e+00
+runtime/iter 7.818532e-04
+
+norm2res_gloabl: 9.135771e+06
+normMres_global: 5.111120e+04
+
+norm2err_global: 3.462112e+04
+normMerr_global: 1.273557e+02
+
+Calculation of 1000x1000 Grid with 4 process(es) using 1D decomposition
+
+runtime 2.797318e+00
+runtime/iter 5.593517e-04
+
+norm2res_gloabl: 9.135771e+06
+normMres_global: 5.111120e+04
+
+norm2err_global: 3.462112e+04
+normMerr_global: 1.273557e+02
+
+Calculation of 1000x1000 Grid with 5 process(es) using 1D decomposition
+
+runtime 2.445444e+00
+runtime/iter 4.889910e-04
+
+norm2res_gloabl: 9.135771e+06
+normMres_global: 5.111120e+04
+
+norm2err_global: 3.462112e+04
+normMerr_global: 1.273557e+02
+
+Calculation of 1000x1000 Grid with 6 process(es) using 1D decomposition
+
+runtime 2.151023e+00
+runtime/iter 4.301185e-04
+
+norm2res_gloabl: 9.135771e+06
+normMres_global: 5.111120e+04
+
+norm2err_global: 3.462112e+04
+normMerr_global: 1.273557e+02

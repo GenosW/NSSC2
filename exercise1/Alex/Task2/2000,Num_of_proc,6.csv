@@ -1,0 +1,2 @@
+iterations,runtime,runtime/iter,norm2res_gloabl,normMres_global,norm2err_global,normMerr_global,
+5000,8.91304,0.00178225,87703.7,181.245,5.15225e+07,207649

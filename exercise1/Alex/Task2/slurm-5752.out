@@ -1,0 +1,24 @@
+/usr/bin/sinfo
+
+Calculation of 2000x2000 Grid with 2 process(es) using 1D decomposition
+srun: error: tcad37: tasks 0-1: Segmentation fault (core dumped)
+
+Calculation of 2000x2000 Grid with 3 process(es) using 1D decomposition
+srun: error: tcad37: tasks 0-2: Segmentation fault (core dumped)
+
+Calculation of 2000x2000 Grid with 4 process(es) using 1D decomposition
+srun: error: tcad37: tasks 0-3: Segmentation fault (core dumped)
+
+Calculation of 2000x2000 Grid with 5 process(es) using 1D decomposition
+srun: error: tcad37: tasks 0-4: Segmentation fault (core dumped)
+
+Calculation of 2000x2000 Grid with 6 process(es) using 1D decomposition
+
+runtime 9.164169e+00
+runtime/iter 1.832467e-03
+
+norm2res_gloabl: 5.152251e+07
+normMres_global: 2.076494e+05
+
+norm2err_global: 8.770367e+04
+normMerr_global: 1.812452e+02

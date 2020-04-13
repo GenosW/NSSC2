@@ -1,0 +1,441 @@
+/usr/bin/sinfo
+
+Calculation of 1000x1000 Grid with 1 process(es) using 1D decomposition
+
+runtime 2.268686e+01
+runtime/iter 2.268460e-03
+
+norm2res_gloabl: 5.272151e+06
+normMres_global: 2.450476e+04
+
+norm2err_global: 2.763430e+04
+normMerr_global: 9.422590e+01
+
+Calculation of 1000x1000 Grid with 2 process(es) using 1D decomposition
+
+runtime 1.104973e+01
+runtime/iter 1.104862e-03
+
+norm2res_gloabl: 5.272151e+06
+normMres_global: 2.450476e+04
+
+norm2err_global: 2.763430e+04
+normMerr_global: 9.422590e+01
+
+Calculation of 1000x1000 Grid with 3 process(es) using 1D decomposition
+
+runtime 7.564282e+00
+runtime/iter 7.563525e-04
+
+norm2res_gloabl: 5.272151e+06
+normMres_global: 2.450476e+04
+
+norm2err_global: 2.763430e+04
+normMerr_global: 9.422590e+01
+
+Calculation of 1000x1000 Grid with 4 process(es) using 1D decomposition
+
+runtime 5.627151e+00
+runtime/iter 5.626588e-04
+
+norm2res_gloabl: 5.272151e+06
+normMres_global: 2.450476e+04
+
+norm2err_global: 2.763430e+04
+normMerr_global: 9.422590e+01
+
+Calculation of 1000x1000 Grid with 5 process(es) using 1D decomposition
+
+runtime 4.738909e+00
+runtime/iter 4.738435e-04
+
+norm2res_gloabl: 5.272151e+06
+normMres_global: 2.450476e+04
+
+norm2err_global: 2.763430e+04
+normMerr_global: 9.422590e+01
+
+Calculation of 1000x1000 Grid with 6 process(es) using 1D decomposition
+
+runtime 4.035332e+00
+runtime/iter 4.034929e-04
+
+norm2res_gloabl: 5.272151e+06
+normMres_global: 2.450476e+04
+
+norm2err_global: 2.763430e+04
+normMerr_global: 9.422590e+01
+
+Calculation of 1000x1000 Grid with 7 process(es) using 1D decomposition
+
+runtime 3.538047e+00
+runtime/iter 3.537693e-04
+
+norm2res_gloabl: 5.272151e+06
+normMres_global: 2.450476e+04
+
+norm2err_global: 2.763430e+04
+normMerr_global: 9.422590e+01
+
+Calculation of 1000x1000 Grid with 8 process(es) using 1D decomposition
+
+runtime 3.023529e+00
+runtime/iter 3.023227e-04
+
+norm2res_gloabl: 5.272151e+06
+normMres_global: 2.450476e+04
+
+norm2err_global: 2.763430e+04
+normMerr_global: 9.422590e+01
+
+Calculation of 1000x1000 Grid with 9 process(es) using 1D decomposition
+
+runtime 2.889695e+00
+runtime/iter 2.889406e-04
+
+norm2res_gloabl: 5.272151e+06
+normMres_global: 2.450476e+04
+
+norm2err_global: 2.763430e+04
+normMerr_global: 9.422590e+01
+
+Calculation of 1000x1000 Grid with 10 process(es) using 1D decomposition
+
+runtime 2.691484e+00
+runtime/iter 2.691215e-04
+
+norm2res_gloabl: 5.272151e+06
+normMres_global: 2.450476e+04
+
+norm2err_global: 2.763430e+04
+normMerr_global: 9.422590e+01
+
+Calculation of 1000x1000 Grid with 11 process(es) using 1D decomposition
+
+runtime 2.356705e+00
+runtime/iter 2.356469e-04
+
+norm2res_gloabl: 5.272151e+06
+normMres_global: 2.450476e+04
+
+norm2err_global: 2.763430e+04
+normMerr_global: 9.422590e+01
+
+Calculation of 1000x1000 Grid with 12 process(es) using 1D decomposition
+
+runtime 2.385903e+00
+runtime/iter 2.385665e-04
+
+norm2res_gloabl: 5.272151e+06
+normMres_global: 2.450476e+04
+
+norm2err_global: 2.763430e+04
+normMerr_global: 9.422590e+01
+
+Calculation of 1000x1000 Grid with 13 process(es) using 1D decomposition
+
+runtime 2.313154e+00
+runtime/iter 2.312923e-04
+
+norm2res_gloabl: 5.272151e+06
+normMres_global: 2.450476e+04
+
+norm2err_global: 2.763430e+04
+normMerr_global: 9.422590e+01
+
+Calculation of 1000x1000 Grid with 14 process(es) using 1D decomposition
+
+runtime 2.373922e+00
+runtime/iter 2.373685e-04
+
+norm2res_gloabl: 5.272151e+06
+normMres_global: 2.450476e+04
+
+norm2err_global: 2.763430e+04
+normMerr_global: 9.422590e+01
+
+Calculation of 1000x1000 Grid with 15 process(es) using 1D decomposition
+
+runtime 2.438335e+00
+runtime/iter 2.438092e-04
+
+norm2res_gloabl: 5.272151e+06
+normMres_global: 2.450476e+04
+
+norm2err_global: 2.763430e+04
+normMerr_global: 9.422590e+01
+
+Calculation of 1000x1000 Grid with 16 process(es) using 1D decomposition
+
+runtime 2.421898e+00
+runtime/iter 2.421655e-04
+
+norm2res_gloabl: 5.272151e+06
+normMres_global: 2.450476e+04
+
+norm2err_global: 2.763430e+04
+normMerr_global: 9.422590e+01
+
+Calculation of 1000x1000 Grid with 17 process(es) using 1D decomposition
+
+runtime 2.571659e+00
+runtime/iter 2.571402e-04
+
+norm2res_gloabl: 5.272151e+06
+normMres_global: 2.450476e+04
+
+norm2err_global: 2.763430e+04
+normMerr_global: 9.422590e+01
+
+Calculation of 1000x1000 Grid with 18 process(es) using 1D decomposition
+
+runtime 2.890069e+00
+runtime/iter 2.889780e-04
+
+norm2res_gloabl: 5.272151e+06
+normMres_global: 2.450476e+04
+
+norm2err_global: 2.763430e+04
+normMerr_global: 9.422590e+01
+
+Calculation of 1000x1000 Grid with 19 process(es) using 1D decomposition
+
+runtime 2.130464e+00
+runtime/iter 2.130251e-04
+
+norm2res_gloabl: 5.272151e+06
+normMres_global: 2.450476e+04
+
+norm2err_global: 2.763430e+04
+normMerr_global: 9.422590e+01
+
+Calculation of 1000x1000 Grid with 20 process(es) using 1D decomposition
+
+runtime 2.452258e+00
+runtime/iter 2.452013e-04
+
+norm2res_gloabl: 5.272151e+06
+normMres_global: 2.450476e+04
+
+norm2err_global: 2.763430e+04
+normMerr_global: 9.422590e+01
+
+Calculation of 1000x1000 Grid with 21 process(es) using 1D decomposition
+
+runtime 2.541496e+00
+runtime/iter 2.541241e-04
+
+norm2res_gloabl: 5.272151e+06
+normMres_global: 2.450476e+04
+
+norm2err_global: 2.763430e+04
+normMerr_global: 9.422590e+01
+
+Calculation of 1000x1000 Grid with 22 process(es) using 1D decomposition
+
+runtime 1.998371e+00
+runtime/iter 1.998171e-04
+
+norm2res_gloabl: 5.272151e+06
+normMres_global: 2.450476e+04
+
+norm2err_global: 2.763430e+04
+normMerr_global: 9.422590e+01
+
+Calculation of 1000x1000 Grid with 23 process(es) using 1D decomposition
+
+runtime 2.239947e+00
+runtime/iter 2.239723e-04
+
+norm2res_gloabl: 5.272151e+06
+normMres_global: 2.450476e+04
+
+norm2err_global: 2.763430e+04
+normMerr_global: 9.422590e+01
+
+Calculation of 1000x1000 Grid with 24 process(es) using 1D decomposition
+
+runtime 2.155268e+00
+runtime/iter 2.155052e-04
+
+norm2res_gloabl: 5.272151e+06
+normMres_global: 2.450476e+04
+
+norm2err_global: 2.763430e+04
+normMerr_global: 9.422590e+01
+
+Calculation of 1000x1000 Grid with 25 process(es) using 1D decomposition
+
+runtime 2.352678e+00
+runtime/iter 2.352443e-04
+
+norm2res_gloabl: 5.272151e+06
+normMres_global: 2.450476e+04
+
+norm2err_global: 2.763430e+04
+normMerr_global: 9.422590e+01
+
+Calculation of 1000x1000 Grid with 26 process(es) using 1D decomposition
+
+runtime 1.936741e+00
+runtime/iter 1.936547e-04
+
+norm2res_gloabl: 5.272151e+06
+normMres_global: 2.450476e+04
+
+norm2err_global: 2.763430e+04
+normMerr_global: 9.422590e+01
+
+Calculation of 1000x1000 Grid with 27 process(es) using 1D decomposition
+
+runtime 2.019550e+00
+runtime/iter 2.019348e-04
+
+norm2res_gloabl: 5.272151e+06
+normMres_global: 2.450476e+04
+
+norm2err_global: 2.763430e+04
+normMerr_global: 9.422590e+01
+
+Calculation of 1000x1000 Grid with 28 process(es) using 1D decomposition
+
+runtime 1.914835e+00
+runtime/iter 1.914644e-04
+
+norm2res_gloabl: 5.272151e+06
+normMres_global: 2.450476e+04
+
+norm2err_global: 2.763430e+04
+normMerr_global: 9.422590e+01
+
+Calculation of 1000x1000 Grid with 29 process(es) using 1D decomposition
+
+runtime 2.020417e+00
+runtime/iter 2.020215e-04
+
+norm2res_gloabl: 5.272151e+06
+normMres_global: 2.450476e+04
+
+norm2err_global: 2.763430e+04
+normMerr_global: 9.422590e+01
+
+Calculation of 1000x1000 Grid with 30 process(es) using 1D decomposition
+
+runtime 1.839256e+00
+runtime/iter 1.839072e-04
+
+norm2res_gloabl: 5.272151e+06
+normMres_global: 2.450476e+04
+
+norm2err_global: 2.763430e+04
+normMerr_global: 9.422590e+01
+
+Calculation of 1000x1000 Grid with 31 process(es) using 1D decomposition
+
+runtime 1.740665e+00
+runtime/iter 1.740491e-04
+
+norm2res_gloabl: 5.272151e+06
+normMres_global: 2.450476e+04
+
+norm2err_global: 2.763430e+04
+normMerr_global: 9.422590e+01
+
+Calculation of 1000x1000 Grid with 32 process(es) using 1D decomposition
+
+runtime 1.704939e+00
+runtime/iter 1.704768e-04
+
+norm2res_gloabl: 5.272151e+06
+normMres_global: 2.450476e+04
+
+norm2err_global: 2.763430e+04
+normMerr_global: 9.422590e+01
+
+Calculation of 1000x1000 Grid with 33 process(es) using 1D decomposition
+
+runtime 2.131578e+00
+runtime/iter 2.131365e-04
+
+norm2res_gloabl: 5.272151e+06
+normMres_global: 2.450476e+04
+
+norm2err_global: 2.763430e+04
+normMerr_global: 9.422590e+01
+
+Calculation of 1000x1000 Grid with 34 process(es) using 1D decomposition
+
+runtime 2.152860e+00
+runtime/iter 2.152645e-04
+
+norm2res_gloabl: 5.272151e+06
+normMres_global: 2.450476e+04
+
+norm2err_global: 2.763430e+04
+normMerr_global: 9.422590e+01
+
+Calculation of 1000x1000 Grid with 35 process(es) using 1D decomposition
+
+runtime 1.961562e+00
+runtime/iter 1.961365e-04
+
+norm2res_gloabl: 5.272151e+06
+normMres_global: 2.450476e+04
+
+norm2err_global: 2.763430e+04
+normMerr_global: 9.422590e+01
+
+Calculation of 1000x1000 Grid with 36 process(es) using 1D decomposition
+
+runtime 3.191536e+00
+runtime/iter 3.191217e-04
+
+norm2res_gloabl: 5.272151e+06
+normMres_global: 2.450476e+04
+
+norm2err_global: 2.763430e+04
+normMerr_global: 9.422590e+01
+
+Calculation of 1000x1000 Grid with 37 process(es) using 1D decomposition
+
+runtime 1.726718e+00
+runtime/iter 1.726546e-04
+
+norm2res_gloabl: 5.272151e+06
+normMres_global: 2.450476e+04
+
+norm2err_global: 2.763430e+04
+normMerr_global: 9.422590e+01
+
+Calculation of 1000x1000 Grid with 38 process(es) using 1D decomposition
+
+runtime 1.505532e+00
+runtime/iter 1.505382e-04
+
+norm2res_gloabl: 5.272151e+06
+normMres_global: 2.450476e+04
+
+norm2err_global: 2.763430e+04
+normMerr_global: 9.422590e+01
+
+Calculation of 1000x1000 Grid with 39 process(es) using 1D decomposition
+
+runtime 2.995317e+00
+runtime/iter 2.995018e-04
+
+norm2res_gloabl: 5.272151e+06
+normMres_global: 2.450476e+04
+
+norm2err_global: 2.763430e+04
+normMerr_global: 9.422590e+01
+
+Calculation of 1000x1000 Grid with 40 process(es) using 1D decomposition
+
+runtime 8.276952e-01
+runtime/iter 8.276124e-05
+
+norm2res_gloabl: 5.272151e+06
+normMres_global: 2.450476e+04
+
+norm2err_global: 2.763430e+04
+normMerr_global: 9.422590e+01
