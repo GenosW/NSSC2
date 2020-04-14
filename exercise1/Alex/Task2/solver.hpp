@@ -11,8 +11,10 @@
 #include <vector>
 #include <fstream>
 #include <numeric>
-#include <string.h>
-
+//#ifdef USEMPI
+#include <mpi.h>
+//#include <mpi/mpi.h>
+//#endif
 namespace nssc
 {
 
@@ -78,6 +80,7 @@ public:
     m = mpi_rank%M;
     n = (mpi_rank-m)/M;
 
+    // Check how many additional (ghost) layers are needed per axis
     int additionalLayer_X = 2;
     int additionalLayer_Y = 2;
     if ( m == 0 || m == M-1 )
@@ -186,7 +189,7 @@ public:
     std::cout << std::defaultfloat;
   }
 
-/////////////////////////////////////////////////////////////////////////////////////// calculate residual global
+/////////////////////////////////////////////////////////////////////////////////////// calculate residual global (not used)
 
   void residual_global()
   {
@@ -221,12 +224,87 @@ public:
     std::cout << endl;
     std::cout << std::scientific << "norm2res_gloabl: " << norm2 << std::endl;
     std::cout << std::scientific << "normMres_global: " << normMax << std::endl;
-	results[5] = norm2;
-    results[6] = normMax;
     }
   };
 
-//////////////////////////////////////////////////////////////////////////////////////////////////////// calculate error global
+/////////////////////////////////////////////////////////////////////////////////////// calculate residual locally 
+
+  void residual_local()
+  {
+    if ( mpi_rank == 0)
+    {
+        double max = 0;
+        double sum = 0;
+        int count = 0;
+        for (int j = 0; j != DIM2; ++j)
+        {
+          for (int i = 0; i != DIM1; ++i)
+          {
+            if (dom[i + DIM1 * j] == Cell::UNKNOWN)
+            {
+              double tmp = Solution(real_x(i) * disc.h, real_y(j) * disc.h) * 4 * M_PI * M_PI -
+                           (sol[(i + 0) + resolution * (j - 0)] * disc.C +
+                            sol[(i + 1) + resolution * (j - 0)] * disc.E +
+                            sol[(i - 1) + resolution * (j - 0)] * disc.W +
+                            sol[(i + 0) + resolution * (j - 1)] * disc.S +
+                            sol[(i + 0) + resolution * (j + 1)] * disc.N);
+
+              max = fabs(tmp) > max ? fabs(tmp) : max;
+              sum += tmp * tmp;
+              ++count;
+            }
+          }
+        }
+        for (int k = 1; k < mpi_numproc; k++)
+        {
+            double max_recieved;
+            double sum_recieved;
+            MPI_Recv(&max_recieved, 1, MPI_DOUBLE, k, MPI_ANY_TAG, MPI_COMM_WORLD, &stat);
+            MPI_Recv(&sum_recieved, 1, MPI_DOUBLE, k, MPI_ANY_TAG, MPI_COMM_WORLD, &stat);
+            max = fabs(max_recieved) > max ? fabs(max_recieved) : max;
+            sum += sum_recieved;
+        }
+        double norm2 = sqrt(sum);
+        double normMax = max;
+
+        std::cout << endl;
+        std::cout << std::scientific << "norm2res_gloabl: " << norm2 << std::endl;
+        std::cout << std::scientific << "normMres_global: " << normMax << std::endl;
+		results[3] = norm2;
+    	results[4] = normMax;
+    }
+    else
+    {
+        double max = 0;
+        double sum = 0;
+        int count = 0;
+        for (int j = 0; j != DIM2; ++j)
+        {
+          for (int i = 0; i != DIM1; ++i)
+          {
+            if (dom[i + DIM1 * j] == Cell::UNKNOWN)
+            {
+              double tmp = Solution(real_x(i) * disc.h, real_y(j) * disc.h) * 4 * M_PI * M_PI -
+                           (sol[(i + 0) + resolution * (j - 0)] * disc.C +
+                            sol[(i + 1) + resolution * (j - 0)] * disc.E +
+                            sol[(i - 1) + resolution * (j - 0)] * disc.W +
+                            sol[(i + 0) + resolution * (j - 1)] * disc.S +
+                            sol[(i + 0) + resolution * (j + 1)] * disc.N);
+
+              max = fabs(tmp) > max ? fabs(tmp) : max;
+              sum += tmp * tmp;
+              ++count;
+            }
+          }
+        }
+        MPI_Send(&max, 1, MPI_DOUBLE, 0, 1, MPI_COMM_WORLD);
+        MPI_Send(&sum, 1, MPI_DOUBLE, 0, 1, MPI_COMM_WORLD);
+    }
+
+  }
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////// calculate error global (not used)
 
 void error_global()
   {
@@ -255,10 +333,73 @@ void error_global()
     std::cout << endl;
     std::cout << std::scientific << "norm2err_global: " << norm2 << std::endl;
     std::cout << std::scientific << "normMerr_global: " << normMax << std::endl;
-	results[3] = norm2;
-    results[4] = normMax;
+
     }
   };
+
+/////////////////////////////////////////////////////////////////////////////////////// calculate error locally 
+
+  void error_local()
+  {
+    if ( mpi_rank == 0)
+    {
+        double max = 0;
+        double sum = 0;
+        for (int j = 0; j != DIM2; ++j)
+        {
+          for (int i = 0; i != DIM1; ++i)
+          {
+            if (dom[i + DIM1 * j] == Cell::UNKNOWN)
+            {
+              double tmp = sol[i +DIM1 * j] -
+                           Solution(real_x(i) * disc.h, real_y(j) * disc.h);
+
+              max = fabs(tmp) > max ? fabs(tmp) : max;
+              sum += tmp * tmp;
+            }
+          }
+        }
+        for (int k = 1; k < mpi_numproc; k++)
+        {
+            double max_recieved;
+            double sum_recieved;
+            MPI_Recv(&max_recieved, 1, MPI_DOUBLE, k, MPI_ANY_TAG, MPI_COMM_WORLD, &stat);
+            MPI_Recv(&sum_recieved, 1, MPI_DOUBLE, k, MPI_ANY_TAG, MPI_COMM_WORLD, &stat);
+            max = fabs(max_recieved) > max ? fabs(max_recieved) : max;
+            sum += sum_recieved;
+        }
+        double norm2 = sqrt(sum);
+        double normMax = max;
+
+        std::cout << endl;
+        std::cout << std::scientific << "norm2err_global: " << norm2 << std::endl;
+        std::cout << std::scientific << "normMerr_global: " << normMax << std::endl;
+    }
+    else
+    {
+        double max = 0;
+        double sum = 0;
+        for (int j = 0; j != DIM2; ++j)
+        {
+          for (int i = 0; i != DIM1; ++i)
+          {
+            if (dom[i + DIM1 * j] == Cell::UNKNOWN)
+            {
+              double tmp = sol[i +DIM1 * j] -
+                           Solution(real_x(i) * disc.h, real_y(j) * disc.h);
+
+              max = fabs(tmp) > max ? fabs(tmp) : max;
+              sum += tmp * tmp;
+            }
+          }
+        }
+        MPI_Send(&max, 1, MPI_DOUBLE, 0, 1, MPI_COMM_WORLD);
+        MPI_Send(&sum, 1, MPI_DOUBLE, 0, 1, MPI_COMM_WORLD);
+    }
+
+  }
+
+
 
 /////////////////////////////////////////////////////////////////////////////////////////////// perform Jacobi Iteration, with optional skip range
 
@@ -278,8 +419,6 @@ void error_global()
       update();
     }
 
-    assemble_Original_Domain_and_Solution();
-
     if (mpi_rank == 0)
     {
         end = std::chrono::high_resolution_clock::now();
@@ -293,6 +432,7 @@ void error_global()
         results[1] = runtime;
         results[2] = runtime/iter;
     }
+    //assemble_Original_Domain_and_Solution();
   }
 
 //////////////////////////////////////////////////////////////////////////////////////////////// update local solution
@@ -393,7 +533,7 @@ void error_global()
 
   };
 
-///////////////////////////////////////////////////////////////////////////////////////////////////// Assemble Original
+///////////////////////////////////////////////////////////////////////////////////////////////////// Assemble Original (not used)
 
     void assemble_Original_Domain_and_Solution()
     {
@@ -575,10 +715,8 @@ void printLocalSolution( string name)
 
 void printGlobalSolution( string name)
       {
-		string file_name = name+".csv";
         ofstream outfile;
-		outfile.open (file_name);
-        //outfile.open(name, ios::out | ios::trunc);
+        outfile.open(name, ios::out | ios::trunc);
         outfile << "Rank " << mpi_rank << ", m: " << m << ", n: " << n << endl << endl;
         outfile << "\t";
         outfile << std::defaultfloat;
@@ -598,8 +736,23 @@ void printGlobalSolution( string name)
         outfile.close();   
       };
 
-////////////////////////////////////////////////////////////////////////////////////////////// print local Rhs (debugging)
+////////////////////////////////////////////////////////////////////////////////////////////// print resultvector
 
+void printresults( string name)
+      {
+		if (mpi_rank == 0)
+    	{
+			string file_name = "data/"+name+".csv";
+		    ofstream outfile;
+			outfile.open (file_name);
+			outfile << "iterations,runtime,runtime/iter,norm2res_gloabl,normMres_global\n";
+			outfile << results[0] << "," << results[1] << "," <<  results[2] << "," <<  results[3] << "," <<  results[4] << std::endl;
+			outfile << std::defaultfloat;
+		    outfile.close();
+		}
+ 	  };
+
+////////////////////////////////////////////////////////////////////////////////////////////// print local Rhs (debugging)
 void printLocalRhs( string name)
       {
         ofstream outfile;
@@ -622,43 +775,6 @@ void printLocalRhs( string name)
         outfile << std::defaultfloat;
         outfile.close();   
       };
-
-////////////////////////////////////////////////////////////////////////////////////////////// print results (debugging)
-
-void printresults( string name)
-      {
-		if (mpi_rank == 0)
-    	{
-			string file_name = name+".csv";
-		    ofstream outfile;
-			outfile.open (file_name);
-			outfile << "iterations,runtime,runtime/iter,norm2res_gloabl,normMres_global,norm2err_global,normMerr_global,\n";
-			outfile << results[0] << "," << results[1] << "," <<  results[2] << "," <<  results[3] << "," <<  results[4] << "," <<  results[5] << "," <<  results[6] << std::endl;
-			outfile << std::defaultfloat;
-		    outfile.close();
-		}
-
-/*      outfile << std::defaultfloat;
-        outfile.close(); 
-        outfile << "Rank " << mpi_rank << ", m: " << m << ", n: " << n << endl << endl;
-        outfile << "\t";
-        outfile << std::defaultfloat;
-        for (int i = 0; i < DIM1; i++)
-            outfile << real_x(i) << "\t";
-        outfile << endl;
-        for (int j = 0; j < DIM2; ++j)
-        {
-            outfile << real_y(j) << "\t";
-          for (int i = 0; i < DIM1; ++i)
-          {
-            outfile << rhs[i + DIM1 * j] << "\t";
-          }
-          outfile << std::endl;
-        }
-*/
-  
-      };
-
 
 ////////////////////////////////////////////////////////////////////////////////////////////////// real X and Y
 
