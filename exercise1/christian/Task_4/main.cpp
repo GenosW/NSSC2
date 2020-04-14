@@ -29,8 +29,8 @@ int main(int argc, char *argv[])
   auto field = Field(resolution,rank,numproc);
 
   field.solve(iterations);
-  field.residual_global();
-  field.error_global();
+  field.residual_local();
+  field.error_local();
 
 #ifdef USEMPI
   MPI_Finalize();

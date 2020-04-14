@@ -187,7 +187,7 @@ public:
     std::cout << std::defaultfloat;
   }
 
-/////////////////////////////////////////////////////////////////////////////////////// calculate residual global
+/////////////////////////////////////////////////////////////////////////////////////// calculate residual global (not used)
 
   void residual_global()
   {
@@ -225,7 +225,82 @@ public:
     }
   };
 
-//////////////////////////////////////////////////////////////////////////////////////////////////////// calculate error global
+
+////////////////////////////////////////////////////////////////////////////////////// calculate residual locally 
+
+  void residual_local()
+  {
+    if ( mpi_rank == 0)
+    {
+        float max = 0;
+        float sum = 0;
+        int count = 0;
+        for (int j = 0; j != DIM2; ++j)
+        {
+          for (int i = 0; i != DIM1; ++i)
+          {
+            if (dom[i + DIM1 * j] == Cell::UNKNOWN)
+            {
+              float tmp = Solution(real_x(i) * disc.h, real_y(j) * disc.h) * 4 * M_PI * M_PI -
+                           (sol[(i + 0) + resolution * (j - 0)] * disc.C +
+                            sol[(i + 1) + resolution * (j - 0)] * disc.E +
+                            sol[(i - 1) + resolution * (j - 0)] * disc.W +
+                            sol[(i + 0) + resolution * (j - 1)] * disc.S +
+                            sol[(i + 0) + resolution * (j + 1)] * disc.N);
+
+              max = fabs(tmp) > max ? fabs(tmp) : max;
+              sum += tmp * tmp;
+              ++count;
+            }
+          }
+        }
+        for (int k = 1; k < mpi_numproc; k++)
+        {
+            float max_recieved;
+            float sum_recieved;
+            MPI_Recv(&max_recieved, 1, MPI_FLOAT, k, MPI_ANY_TAG, MPI_COMM_WORLD, &stat);
+            MPI_Recv(&sum_recieved, 1, MPI_FLOAT, k, MPI_ANY_TAG, MPI_COMM_WORLD, &stat);
+            max = fabs(max_recieved) > max ? fabs(max_recieved) : max;
+            sum += sum_recieved;
+        }
+        float norm2 = sqrt(sum);
+        float normMax = max;
+
+        std::cout << endl;
+        std::cout << std::scientific << "norm2res_gloabl: " << norm2 << std::endl;
+        std::cout << std::scientific << "normMres_global: " << normMax << std::endl;
+    }
+    else
+    {
+        float max = 0;
+        float sum = 0;
+        int count = 0;
+        for (int j = 0; j != DIM2; ++j)
+        {
+          for (int i = 0; i != DIM1; ++i)
+          {
+            if (dom[i + DIM1 * j] == Cell::UNKNOWN)
+            {
+              float tmp = Solution(real_x(i) * disc.h, real_y(j) * disc.h) * 4 * M_PI * M_PI -
+                           (sol[(i + 0) + resolution * (j - 0)] * disc.C +
+                            sol[(i + 1) + resolution * (j - 0)] * disc.E +
+                            sol[(i - 1) + resolution * (j - 0)] * disc.W +
+                            sol[(i + 0) + resolution * (j - 1)] * disc.S +
+                            sol[(i + 0) + resolution * (j + 1)] * disc.N);
+
+              max = fabs(tmp) > max ? fabs(tmp) : max;
+              sum += tmp * tmp;
+              ++count;
+            }
+          }
+        }
+        MPI_Send(&max, 1, MPI_FLOAT, 0, 1, MPI_COMM_WORLD);
+        MPI_Send(&sum, 1, MPI_FLOAT, 0, 1, MPI_COMM_WORLD);
+    }
+
+  }
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////// calculate error global (not used)
 
 void error_global()
   {
@@ -258,6 +333,70 @@ void error_global()
     }
   };
 
+/////////////////////////////////////////////////////////////////////////////////////// calculate error locally 
+
+  void error_local()
+  {
+    if ( mpi_rank == 0)
+    {
+        float max = 0;
+        float sum = 0;
+        for (int j = 0; j != DIM2; ++j)
+        {
+          for (int i = 0; i != DIM1; ++i)
+          {
+            if (dom[i + DIM1 * j] == Cell::UNKNOWN)
+            {
+              float tmp = sol[i +DIM1 * j] -
+                           Solution(real_x(i) * disc.h, real_y(j) * disc.h);
+
+              max = fabs(tmp) > max ? fabs(tmp) : max;
+              sum += tmp * tmp;
+            }
+          }
+        }
+        for (int k = 1; k < mpi_numproc; k++)
+        {
+            float max_recieved;
+            float sum_recieved;
+            MPI_Recv(&max_recieved, 1, MPI_FLOAT, k, MPI_ANY_TAG, MPI_COMM_WORLD, &stat);
+            MPI_Recv(&sum_recieved, 1, MPI_FLOAT, k, MPI_ANY_TAG, MPI_COMM_WORLD, &stat);
+            max = fabs(max_recieved) > max ? fabs(max_recieved) : max;
+            sum += sum_recieved;
+        }
+        float norm2 = sqrt(sum);
+        float normMax = max;
+
+        std::cout << endl;
+        std::cout << std::scientific << "norm2err_global: " << norm2 << std::endl;
+        std::cout << std::scientific << "normMerr_global: " << normMax << std::endl;
+    }
+    else
+    {
+        float max = 0;
+        float sum = 0;
+        for (int j = 0; j != DIM2; ++j)
+        {
+          for (int i = 0; i != DIM1; ++i)
+          {
+            if (dom[i + DIM1 * j] == Cell::UNKNOWN)
+            {
+              float tmp = sol[i +DIM1 * j] -
+                           Solution(real_x(i) * disc.h, real_y(j) * disc.h);
+
+              max = fabs(tmp) > max ? fabs(tmp) : max;
+              sum += tmp * tmp;
+            }
+          }
+        }
+        MPI_Send(&max, 1, MPI_FLOAT, 0, 1, MPI_COMM_WORLD);
+        MPI_Send(&sum, 1, MPI_FLOAT, 0, 1, MPI_COMM_WORLD);
+    }
+
+  }
+
+
+
 /////////////////////////////////////////////////////////////////////////////////////////////// perform Jacobi Iteration, with optional skip range
 
   void solve(int iterations)
@@ -276,7 +415,6 @@ void error_global()
       update();
     }
 
-    assemble_Original_Domain_and_Solution();
 
     if (mpi_rank == 0)
     {
@@ -288,6 +426,8 @@ void error_global()
         std::cout << endl << std::scientific << "runtime " << runtime << std::endl;
         std::cout << std::scientific << "runtime/iter " << runtime / iter << std::endl;
     }
+
+     //assemble_Original_Domain_and_Solution();
   }
 
 //////////////////////////////////////////////////////////////////////////////////////////////// update local solution
