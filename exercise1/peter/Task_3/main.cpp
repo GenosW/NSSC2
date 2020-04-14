@@ -26,7 +26,11 @@ int main(int argc, char *argv[])
 
   assert(iterations > 0);
   assert(resolution > 3);
-  Field<double> field(resolution,rank,numproc);
+
+  // double
+  //Field<double> field(resolution,rank,numproc);
+  //float
+  Field<float> field(resolution,rank,numproc);
 
   field.solve(iterations);
   field.residual_local();
