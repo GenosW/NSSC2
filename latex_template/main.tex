@@ -1,0 +1,108 @@
+\documentclass[11pt,a4paper]{article}
+%\usepackage{mathtools,comicsans}
+\usepackage[utf8]{inputenc}
+\usepackage[left=2.5cm,right=2cm, bottom=2cm]{geometry}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{amsfonts}
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage{subfigure}
+\usepackage{color}
+\usepackage{abstract}
+\usepackage{float}
+\usepackage[toc,page]{appendix}
+\usepackage{listings}
+%\lstset{language=C++}
+
+\DeclareUnicodeCharacter{2212}{-}
+\newcommand{\overbar}[1]{\mkern 1.5mu\overline{\mkern-1.5mu#1\mkern-1.5mu}\mkern 1.5mu}
+
+%\title{NSSC_Ex3}
+%\date{December 2019}
+
+
+\begin{document}
+%%%%%%%%% TITLE PAGE %%%%%%%%%
+\begin{titlepage}
+	\centering
+	\begin{center}
+	\includegraphics[width=6cm]{Bilder/IuE-Logo.png}
+	\end{center}
+	{\scshape\LARGE INSTITUTE OF MICROELECTRONICS\par}
+	\vspace{1cm}
+	{\scshape\Large NSSC2 - Exercise 1\par}
+	\vspace{1.5cm}
+	{\huge\bfseries Group ?\par}
+	\vspace{2cm}
+	Member:\par
+	{\Large\itshape Christian \textsc{Gollmann, 01435044}\par}
+	{\Large\itshape Peter \textsc{Holzner, 01426733}\par}
+	{\Large\itshape Alexander \textsc{Leitner, 01525882}\par}
+	\vspace{1.5cm}
+	Submission: \today\par
+	\vfill
+\end{titlepage}
+\tableofcontents 
+\thispagestyle{empty}
+\newpage
+
+\setcounter{page}{1}
+%%%%%%%%% SECTION 1 %%%%%%%%%
+\section{Task 1: Questions}
+\begin{itemize}	
+\item[(a)] Describe the advantages/disadvantages of a two-dimensional decomposition (over a one-dimensional decomposition).
+\item[(b)] Using a ghost layer based decomposition, how could multiple independent Jacobi iterations be achieved
+before communication has to happen?
+\item[(c)] Describe the conceptual differences between an hybrid OpenMP/MPI-parallelization over a pure MPIparallelization.
+\item[(d)] How big is the sum of all L2 caches for 2 nodes of the IUE-cluster1?
+\end{itemize}
+%%%%%%% SECTION 1 END %%%%%%%
+\newpage
+%%%%%%%%% SECTION 2 %%%%%%%%%
+\section{Task 2: 1D Decomposition}
+\subsection{Description}
+Your task is to implement a one-dimensional decomposition using ghost layers and MPI-commu-
+nication to update the ghost layers. 
+Create a program which is callable by
+\begin{lstlisting}[language=bash]
+	mpirun -n NUMMPIPROC ./jacobiMPI resolution iterations
+\end{lstlisting}
+e.g., 
+\begin{lstlisting}[language=bash]
+	mpirun -n 4 ./jacobiMPI 250 30
+\end{lstlisting}
+, where NUMMPIPROC is the number of MPI-processes to launch, resolution defines the grid spacing as h = 1:0=(resolution-1), and iterations defines the number of Jacobi iterations to perform. 
+Further and more specifically, your program should
+\begin{itemize}
+\item use $\overbar u_h$ = 0 as initial approximation to $u$, and (after finishing all iterations)
+\item print the Euclidean $\vert\vert\cdot\vert\vert_2$ and Maximum $\vert\vert\cdot\vert\vert_\infty$ norm  of the residual $\vert\vert A_h \overbar u_h − b_h  \vert\vert$ and of the total error
+$\vert\vert \overbar u_h − u_p \vert\vert$ to the console, and
+\item print the average runtime per iteration to the console, and
+\item produce the same results as a serial run.
+\end{itemize}
+Finally, benchmark the parallel performance of your program jacobiMPI using 2 nodes of the IUE-Cluster for
+4 different $resolutions=\{250, 1000, 4000, 8000\}$ using between 1 and 80 MPI-processes (NUMMPIPROC). More
+specifically, you should
+\begin{itemize}
+\item create a plot of the parallel speed and a plot of the parallel efficiency for each resolution, and
+\item discuss the results in detail
+\end{itemize}
+%%%%%%% SECTION 2 END %%%%%%%
+\newpage
+%%%%%%%%% SECTION 3 %%%%%%%%%
+\section{Task 3: Single-Precision Data Representation}
+Adopt your program jacobiMPI from above by changing the underlying floating point data type of the direcrtization from double to float. Specifically,
+\begin{itemize}
+	\item a correct implementation (by comparing results to a serial run), and
+\item compare the results to with the results from Task 2 in a suitable plot and dicuss your results.
+\end{itemize}
+%%%%%%% SECTION 3 END %%%%%%%
+\newpage
+%%%%%%%%% SECTION 4 %%%%%%%%%
+\section{Task 4: 1D Decomposition}
+Extend your program from Task 2 by implementing a two-dimensional decomposition using a ghost layer and MPI-communication to update the ghost layers. Create a program which is callable by mpirun -n NUMMPIPROC . / jacobiMPI2D resolution iterations where the command parameters have the same meaning as bove.
+Ensure a correct implementation by comparing your results to a serial run. Benmarking on the cluster is not required.
+%%%%%%% SECTION 2 END %%%%%%%
+\end{document}
