@@ -14,7 +14,7 @@ int main(int argc, char *argv[])
 {
   int rank=0;
   int numproc=1;
-  bool comparemode = true;
+  bool comparemode = false;     // enable to generate compare files for Task 3
 #ifdef USEMPI
   MPI_Init(NULL, NULL);
   MPI_Comm_size(MPI_COMM_WORLD, &numproc);

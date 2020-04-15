@@ -59,7 +59,7 @@ public:
   double normMax_residual;
   int numberiterations;
   bool debugmode = false;           // enable to get a bunch of extra information about local domains, local solutions etc. in text files
-  bool comparemode = true;
+  bool comparemode = false;         // enable to generate compare file for Task 3
   string name;
 
   int mpi_rank;
