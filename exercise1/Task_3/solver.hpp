@@ -379,7 +379,7 @@ void error_global()
         if(comparemode)
         {
             ofstream outfile;
-            outfile.open("Test.txt", fstream::app);
+            outfile.open("Compare_float.txt", fstream::app);
             outfile << std::defaultfloat;
             outfile << resolution << "   " << numberiterations << "   " << norm2_residual << "   " << normMax_residual << "   " << norm2 << "   " << normMax << endl;
             outfile.close(); 
