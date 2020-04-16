@@ -369,7 +369,7 @@ public:
       {
           MPI_Recv(rec_left.data(), DIM2, PREC_MPI, 
                     rank_rightNeighbor, // n*M+m+1,
-                    MPI_ANY_TAG,
+                    3,//MPI_ANY_TAG,
                     MPI_COMM_WORLD,
                     &stat);
           for (int j = 0; j < DIM2; ++j)
@@ -391,7 +391,7 @@ public:
       if (m > 0)
       {
           MPI_Recv(rec_right.data(), DIM2, PREC_MPI, rank_leftNeighbor,
-                    MPI_ANY_TAG,
+                    4,//MPI_ANY_TAG,
                     MPI_COMM_WORLD,
                     &stat);
           for (int j = 0; j < DIM2; ++j)
