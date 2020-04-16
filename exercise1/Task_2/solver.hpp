@@ -12,8 +12,8 @@
 #include <fstream>
 #include <numeric>
 //#ifdef USEMPI
-#include <mpi.h>
-//#include <mpi/mpi.h>
+//#include <mpi.h>
+#include <mpi/mpi.h>
 //#endif
 namespace nssc
 {
