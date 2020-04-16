@@ -128,7 +128,7 @@ public:
     rhs_global = std::vector<double>(resolution*resolution, 0);
     dom = std::vector<int>(DIM1 * DIM2, Cell::UNKNOWN);
     dom_global = std::vector<int>(resolution*resolution, Cell::UNKNOWN);
-	  results = std::vector<double>(6, 0);
+	  results = std::vector<double>(3, 0);
     // vertical communication
     msg_upper = std::vector<double>(DIM1, 0);
     rec_upper= std::vector<double>(DIM1, 0);
@@ -206,7 +206,7 @@ public:
 
     std::chrono::time_point<std::chrono::high_resolution_clock> start;
     std::chrono::time_point<std::chrono::high_resolution_clock> end;
-    double runtime;
+    double runtime, totalComTime=0;
 
     if (mpi_rank == 0)
         start = std::chrono::high_resolution_clock::now();
@@ -214,7 +214,7 @@ public:
     int iter;
     for (iter = 1; iter <= iterations; ++iter)
     {
-      update();
+      totalComTime += update();
     }
     numberiterations = iter-1;
 
@@ -227,13 +227,17 @@ public:
 
         std::cout << endl << std::scientific << "runtime " << runtime << std::endl;
         std::cout << std::scientific << "runtime/iter " << runtime / iter << std::endl;
+        std::cout << endl << std::scientific << "com time " << totalComTime << std::endl;
+        results[0] = runtime;
+        results[1] = runtime / iter;
+        results[2] = totalComTime;
     }
     //assemble_Original_Domain_and_Solution();
   }
 
 //////////////////////////////////////////////////////////////////////////////////////////////// update local solution
 
-  void update()
+  double update()
   {
     for (int j = 1; j < DIM2 - 1; ++j)
     {
@@ -253,11 +257,13 @@ public:
     }
     sol.swap(sol2);
 
+    double comTime = 0;
+    std::chrono::time_point<std::chrono::high_resolution_clock> startCom;
+    if (mpi_rank == 0) {startCom = std::chrono::high_resolution_clock::now();};
     ///////////////////////// vertical communication /////////////////////////////////
     MPI_Request req_upper, req_lower, req_left, req_right;
     if (n > 0 && rank_upperNeighbor >= 0) // n...position of process/decomposition in vertical dimension
     {
-        
         for (int i = 0; i < DIM1; ++i)
             msg_upper[i] = sol[DIM1+i];
         
@@ -356,12 +362,15 @@ public:
     //   }
     //   MPI_Wait(&req_right, &stat); // Is right hori comm done? --> Is all comm done?
     // }
+    std::chrono::time_point<std::chrono::high_resolution_clock> endCom;
+    if (mpi_rank == 0) {endCom = std::chrono::high_resolution_clock::now();}
+    comTime = std::chrono::duration_cast<std::chrono::duration<double>>(endCom - startCom).count();
     if(debugmode)
     {
         string name = "localSolution" + std::to_string(mpi_rank) + "__" + std::to_string(mpi_numproc) + ".txt";
         printLocalSolution(name);
     }
-
+    return comTime;
   };
 
 /////////////////////////////////////////////////////////////////////////////////////// calculate residual locally 
@@ -407,8 +416,8 @@ public:
         std::cout << endl;
         std::cout << std::scientific << "norm2res_gloabl: " << norm2_residual << std::endl;
         std::cout << std::scientific << "normMres_global: " << normMax_residual << std::endl;
-		results[3] = norm2_residual;
-    	results[4] = normMax_residual;
+		    // results[4] = norm2_residual;
+    	  // results[5] = normMax_residual;
     }
     else
     {
@@ -513,10 +522,23 @@ public:
     }
 
   }
-
+////////////////////////////////////////////////////////////////////////////////////////////// write resultvector
+  void printResults( string name)
+      {
+		if (mpi_rank == 0)
+    	{
+			string file_name = "data/"+name+".csv";
+		    ofstream outfile;
+			outfile.open (file_name);
+			outfile << "runtime,runtime/iter,totalComTime\n";
+			outfile << results[0] << "," << results[1] << "," <<  results[2] << std::endl;
+			outfile << std::defaultfloat;
+		    outfile.close();
+		}
+ 	  };
 ////////////////////////////////////////////////////////////////////////////////////////////// print local Domain (debugging)
 
-void printLocalDomain( string name)
+  void printLocalDomain( string name)
       {
         ofstream outfile;
         outfile.open(name, ios::out | ios::trunc);

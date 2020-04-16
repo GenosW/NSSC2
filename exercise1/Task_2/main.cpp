@@ -33,12 +33,12 @@ int main(int argc, char *argv[])
   {
       auto field = Field(resolution,rank,numproc);
 
-      name = to_string(resolution)+","+"Num_of_proc"+","+to_string(numproc);
+      name = "data/"+to_string(resolution)+","+"Num_of_proc"+","+to_string(numproc);
 
       field.solve(iterations);
       field.residual_local();
       field.error_local();
-      //field.printresults(name);
+      field.printResults(name);
   }
   if(comparemode)
   {
