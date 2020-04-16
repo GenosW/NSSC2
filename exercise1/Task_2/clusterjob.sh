@@ -3,7 +3,8 @@
 #SBATCH -N 2
 #SBATCH --ntasks-per-node=40
 #SBATCH --cpus-per-task=1
-#SBATCH --exclusive 
+#SBATCH --exclusive
+#SBATCH --exclude=tcad[37]
 
 if command -v sinfo  2>/dev/null # if on cluster
 then
@@ -16,5 +17,5 @@ else  # if on local machine
     mpiproc=4
 fi
 
-srun -n $mpiproc ./jacobiMPI 16 10000
+srun -n $mpiproc ./jacobiMPI 2000 15
 
