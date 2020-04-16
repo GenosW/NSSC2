@@ -38,7 +38,7 @@ int main(int argc, char *argv[])
       field.solve(iterations);
       field.residual_local();
       field.error_local();
-      field.printresults(name);
+      //field.printresults(name);
   }
   if(comparemode)
   {

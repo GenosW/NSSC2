@@ -30,7 +30,7 @@ int main(int argc, char *argv[])
   assert(resolution > 3);
   if(!comparemode)
   {
-      Field<float> field(resolution,rank,numproc);
+      Field<double> field(resolution,rank,numproc);
 
       field.solve(iterations);
       field.residual_local();

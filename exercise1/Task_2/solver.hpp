@@ -128,9 +128,7 @@ public:
     rhs_global = std::vector<double>(resolution*resolution, 0);
     dom = std::vector<int>(DIM1 * DIM2, Cell::UNKNOWN);
     dom_global = std::vector<int>(resolution*resolution, Cell::UNKNOWN);
-<<<<<<< HEAD
-	results = std::vector<double>(6, 0);
-=======
+	  results = std::vector<double>(6, 0);
     // vertical communication
     msg_upper = std::vector<double>(DIM1, 0);
     rec_upper= std::vector<double>(DIM1, 0);
@@ -141,7 +139,6 @@ public:
     rec_left = std::vector<double>(DIM2, 0);
     msg_right = std::vector<double>(DIM2, 0);
     rec_right = std::vector<double>(DIM2, 0);
->>>>>>> 2638bfea1c81f7e116324078bbe67fd51ee27f9e
 
 ///////////////////////////////////////////////////////////////////////////////////////////// setup local domain
 
@@ -543,42 +540,6 @@ void printLocalDomain( string name)
         outfile.close();   
       };
 
-<<<<<<< HEAD
-/////////////////////////////////////////////////////////////////////////////////////////////// perform Jacobi Iteration, with optional skip range
-
-  void solve(int iterations)
-  {
-
-    std::chrono::time_point<std::chrono::high_resolution_clock> start;
-    std::chrono::time_point<std::chrono::high_resolution_clock> end;
-    double runtime;
-	double runtime_jac;
-
-    if (mpi_rank == 0)
-        start = std::chrono::high_resolution_clock::now();
-
-    int iter;
-    for (iter = 1; iter <= iterations; ++iter)
-    {
-      runtime_jac += update();
-    }
-    numberiterations = iter-1;
-
-    if (mpi_rank == 0)
-    {
-        end = std::chrono::high_resolution_clock::now();
-        runtime = std::chrono::duration_cast<std::chrono::duration<double>>(end - start).count();
-
-        std::cout << endl << std::scientific << "runtime " << runtime << std::endl;
-        std::cout << std::scientific << "runtime/iter " << runtime / iter << std::endl;
-		results[0] = iterations;
-        results[1] = runtime;
-        results[2] = runtime/iter;
-		results[5] = runtime_jac;
-    }
-    //assemble_Original_Domain_and_Solution();
-  }
-=======
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////// print local Solution (debugging)
@@ -605,21 +566,10 @@ void printLocalSolution( string name)
         outfile << std::defaultfloat;
         outfile.close();   
       };
->>>>>>> 2638bfea1c81f7e116324078bbe67fd51ee27f9e
 
 ////////////////////////////////////////////////////////////////////////////////////////////// print local Rhs (debugging)
 
-<<<<<<< HEAD
-  double update()
-  { double runtime;
-	std::chrono::time_point<std::chrono::high_resolution_clock> start_jac;
-    std::chrono::time_point<std::chrono::high_resolution_clock> end_jac;
-    for (int j = 1; j < DIM2 - 1; ++j)
-    {
-      for (int i = 1; i < DIM1 - 1; ++i)
-=======
 void printLocalRhs( string name)
->>>>>>> 2638bfea1c81f7e116324078bbe67fd51ee27f9e
       {
         ofstream outfile;
         outfile.open(name, ios::out | ios::trunc);
@@ -642,23 +592,9 @@ void printLocalRhs( string name)
         outfile.close();   
       };
 
-<<<<<<< HEAD
-    ///////////////////////// vertical communication /////////////////////////////////
-	start_jac = std::chrono::high_resolution_clock::now();
-    if (n > 0)
-    {
-        double msg_upper[DIM1];
-        for (int i = 0; i < DIM1; ++i)
-            msg_upper[i] = sol[DIM1+i];
-        
-        MPI_Send(msg_upper, DIM1, MPI_DOUBLE, (n-1)*M+m, 1, MPI_COMM_WORLD);
-    }
-    if (n < N-1)
-=======
 ////////////////////////////////////////////////////////////////////////////////////////////////// real X and Y
 
 int real_x(int i)
->>>>>>> 2638bfea1c81f7e116324078bbe67fd51ee27f9e
     {
         int x = i + m*(int)std::floor((double)resolution/(double)M) - min(m,1);
         return x;
@@ -910,67 +846,7 @@ int real_y(int j)
         outfile << std::defaultfloat;
         outfile.close();   
       };
-<<<<<<< HEAD
-
-////////////////////////////////////////////////////////////////////////////////////////////// print local Rhs (debugging)
-
-void printLocalRhs( string name)
-      {
-        ofstream outfile;
-        outfile.open(name, ios::out | ios::trunc);
-        outfile << "Rank " << mpi_rank << ", m: " << m << ", n: " << n << endl << endl;
-        outfile << "\t";
-        outfile << std::defaultfloat;
-        for (int i = 0; i < DIM1; i++)
-            outfile << real_x(i) << "\t";
-        outfile << endl;
-        for (int j = 0; j < DIM2; ++j)
-        {
-            outfile << real_y(j) << "\t";
-          for (int i = 0; i < DIM1; ++i)
-          {
-            outfile << rhs[i + DIM1 * j] << "\t";
-          }
-          outfile << std::endl;
-        }
-        outfile << std::defaultfloat;
-        outfile.close();   
-      };
-
-////////////////////////////////////////////////////////////////////////////////////////////// print resultvector
-
-void printresults( string name)
-      {
-		if (mpi_rank == 0)
-    	{
-			string file_name = "data/"+name+".csv";
-		    ofstream outfile;
-			outfile.open (file_name);
-			outfile << "iterations,runtime,runtime/iter,norm2res_gloabl,normMres_global,runtime_com,runtime_jac\n";
-			outfile << results[0] << "," << results[1] << "," <<  results[2] << "," <<  results[3] << "," <<  results[4] << "," << results[5]/10 << "," << abs(results[1]-results[5]) << std::endl;
-			outfile << std::defaultfloat;
-		    outfile.close();
-		}
- 	  };
-
-////////////////////////////////////////////////////////////////////////////////////////////////// real X and Y
-
-int real_x(int i)
-    {
-        int x = i + m*(int)std::floor((double)resolution/(double)M) - min(m,1);
-        return x;
-    };
-
-int real_y(int j)
-    {
-        int y = j + n*(int)std::floor((double)resolution/(double)N) - min(n,1);
-        return y;
-    };
-
-
-=======
 */
->>>>>>> 2638bfea1c81f7e116324078bbe67fd51ee27f9e
 };
 
 

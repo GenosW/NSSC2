@@ -4,8 +4,8 @@
 #SBATCH --ntasks-per-node=40
 #SBATCH --cpus-per-task=1
 #SBATCH --exclusive 
-# SBATCH --time=00:40:00
-# SBATCH --exclude=tcad[37]
+#SBATCH --time=00:40:00
+#SBATCH --exclude=tcad[37]
 
 if command -v sinfo  2>/dev/null # if on cluster
 then
