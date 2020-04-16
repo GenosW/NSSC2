@@ -6,6 +6,7 @@
 #ifdef USEMPI
 #include <mpi.h>
 #endif
+#include <string.h>
 #include "arguments.hpp"
 #include "solver.hpp"
 
@@ -13,6 +14,7 @@ int main(int argc, char *argv[])
 {
   int rank=0;
   int numproc=1;
+  string name;
 #ifdef USEMPI
   MPI_Init(NULL, NULL);
   MPI_Comm_size(MPI_COMM_WORLD, &numproc);
@@ -28,10 +30,12 @@ int main(int argc, char *argv[])
   assert(resolution > 3);
   auto field = Field(resolution,rank,numproc);
 
+  name = to_string(resolution)+","+"Num_of_proc"+","+to_string(numproc);
+
   field.solve(iterations);
   field.residual_local();
   field.error_local();
-
+  field.printresults(name);
 #ifdef USEMPI
   MPI_Finalize();
 #endif

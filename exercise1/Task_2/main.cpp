@@ -3,6 +3,7 @@
 #include <iomanip>
 #include <iostream>
 #include <vector>
+#include <string.h>
 #ifdef USEMPI
 #include <mpi.h>
 #endif
@@ -13,6 +14,7 @@ int main(int argc, char *argv[])
 {
   int rank=0;
   int numproc=1;
+  string name;
   bool comparemode = false; // for generating compare files for Task 3
 #ifdef USEMPI
   MPI_Init(NULL, NULL);
@@ -31,9 +33,12 @@ int main(int argc, char *argv[])
   {
       auto field = Field(resolution,rank,numproc);
 
+      name = to_string(resolution)+","+"Num_of_proc"+","+to_string(numproc);
+
       field.solve(iterations);
       field.residual_local();
       field.error_local();
+      field.printresults(name);
   }
   if(comparemode)
   {
