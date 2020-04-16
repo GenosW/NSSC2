@@ -16,7 +16,7 @@ jacobiSERIAL: Makefile main.cpp solver.hpp arguments.hpp
 	$(CXX) main.cpp -o build/jacobiSERIAL $(CXXFLAGS)
 
 jacobiMPI: Makefile main.cpp solver.hpp arguments.hpp
-	$(MPICXX) main.cpp -o build/jacobiMPI -lpthread -DUSEMPI $(CXXFLAGS)
+	$(MPICXX) main.cpp -o jacobiMPI -lpthread -DUSEMPI $(CXXFLAGS)
 
 .PHONY: clean
 

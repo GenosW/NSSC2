@@ -56,6 +56,7 @@ public:
   std::vector<double> sol_global;   // global solution
   std::vector<int> dom_global;      // global domaininfo
   std::vector<double> rhs_global;   // global rhs
+  std::vector<double> results;   // results
   bool debugmode = false;           // enable to get a bunch of extra information about local domains, local solutions etc. in text files
   string name;
 
@@ -110,7 +111,7 @@ public:
     rhs_global = std::vector<double>(resolution*resolution, 0);
     dom = std::vector<int>(DIM1 * DIM2, Cell::UNKNOWN);
     dom_global = std::vector<int>(resolution*resolution, Cell::UNKNOWN);
-
+    results = std::vector<double>(6, 0);  
 ///////////////////////////////////////////////////////////////////////////////////////////// setup local domain
 
     for (int j = 0; j != DIM2; ++j)
@@ -269,8 +270,11 @@ public:
         double normMax = max;
 
         std::cout << endl;
-        std::cout << std::scientific << "norm2res_gloabl: " << norm2 << std::endl;
-        std::cout << std::scientific << "normMres_global: " << normMax << std::endl;
+        std::cout << std::scientific << "norm2res_local: " << norm2 << std::endl;
+        std::cout << std::scientific << "normMres_local: " << normMax << std::endl;
+		results[3] = norm2;
+		results[4] = normMax;
+
     }
     else
     {
@@ -374,6 +378,8 @@ void error_global()
         std::cout << endl;
         std::cout << std::scientific << "norm2err_global: " << norm2 << std::endl;
         std::cout << std::scientific << "normMerr_global: " << normMax << std::endl;
+		results[5] = norm2;
+		results[6] = normMax;
     }
     else
     {
@@ -429,6 +435,9 @@ void error_global()
 
         std::cout << endl << std::scientific << "runtime " << runtime << std::endl;
         std::cout << std::scientific << "runtime/iter " << runtime / iter << std::endl;
+		results[0] = iterations;
+		results[1] = runtime;
+		results[2] = runtime / iter;
     }
     
     //assemble_Original_Domain_and_Solution();
@@ -812,6 +821,22 @@ void printLocalRhs( string name)
         outfile << std::defaultfloat;
         outfile.close();   
       };
+
+////////////////////////////////////////////////////////////////////////////////////////////// print resultvector
+
+void printresults( string name)
+      {
+		if (mpi_rank == 0)
+    	{
+			string file_name = "data/"+name+".csv";
+		    ofstream outfile;
+			outfile.open (file_name);
+			outfile << "iterations,runtime,runtime/iter,norm2res_gloabl,normMres_global\n";
+			outfile << results[0] << "," << results[1] << "," <<  results[2] << "," <<  results[3] << "," <<  results[4] << std::endl;
+			outfile << std::defaultfloat;
+		    outfile.close();
+		}
+ 	  };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////// real X and Y
 
