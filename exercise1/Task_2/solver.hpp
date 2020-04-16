@@ -15,7 +15,6 @@
 #include <mpi.h>
 //#include <mpi/mpi.h>
 //#endif
-
 namespace nssc
 {
 
@@ -56,13 +55,13 @@ public:
   std::vector<double> sol_global;   // global solution
   std::vector<int> dom_global;      // global domaininfo
   std::vector<double> rhs_global;   // global rhs
-<<<<<<< HEAD
-  std::vector<double> results;   // results
+  double norm2_residual;
+  double normMax_residual;
+  int numberiterations;
   bool debugmode = false;           // enable to get a bunch of extra information about local domains, local solutions etc. in text files
-=======
-  bool debugmode = true;           // enable to get a bunch of extra information about local domains, local solutions etc. in text files
->>>>>>> 82f4757d88d398856a58d3e70390ccbc6b08ad75
+  bool comparemode = false;         // enable to generate compare file for Task 3
   string name;
+  std::vector<double> results; // results array
 
   int mpi_rank;
   int mpi_numproc;
@@ -79,11 +78,9 @@ public:
 
     // allocate arrays
     M = 1;
-    N = 1;
-    factorization(mpi_numproc);
+    N = mpi_numproc;
     if(mpi_rank == 0)
-        std::cout << endl << "Calculation of " << resolution << "x" << resolution << " Grid with " << mpi_numproc << " process(es) using 2D decomposition" << endl 
-        << "M: " << M << ", N: " << N << endl;
+        std::cout << endl << "Calculation of " << resolution << "x" << resolution << " Grid with " << mpi_numproc << " process(es) using 1D decomposition" << endl; 
     m = mpi_rank%M;
     n = (mpi_rank-m)/M;
 
@@ -115,7 +112,8 @@ public:
     rhs_global = std::vector<double>(resolution*resolution, 0);
     dom = std::vector<int>(DIM1 * DIM2, Cell::UNKNOWN);
     dom_global = std::vector<int>(resolution*resolution, Cell::UNKNOWN);
-    results = std::vector<double>(6, 0);  
+	results = std::vector<double>(6, 0);
+
 ///////////////////////////////////////////////////////////////////////////////////////////// setup local domain
 
     for (int j = 0; j != DIM2; ++j)
@@ -249,11 +247,11 @@ public:
             if (dom[i + DIM1 * j] == Cell::UNKNOWN)
             {
               double tmp = Solution(real_x(i) * disc.h, real_y(j) * disc.h) * 4 * M_PI * M_PI -
-                           (sol[(i + 0) + DIM1 * (j - 0)] * disc.C +
-                            sol[(i + 1) + DIM1 * (j - 0)] * disc.E +
-                            sol[(i - 1) + DIM1 * (j - 0)] * disc.W +
-                            sol[(i + 0) + DIM1 * (j - 1)] * disc.S +
-                            sol[(i + 0) + DIM1 * (j + 1)] * disc.N);
+                           (sol[(i + 0) + resolution * (j - 0)] * disc.C +
+                            sol[(i + 1) + resolution * (j - 0)] * disc.E +
+                            sol[(i - 1) + resolution * (j - 0)] * disc.W +
+                            sol[(i + 0) + resolution * (j - 1)] * disc.S +
+                            sol[(i + 0) + resolution * (j + 1)] * disc.N);
 
               max = fabs(tmp) > max ? fabs(tmp) : max;
               sum += tmp * tmp;
@@ -270,15 +268,14 @@ public:
             max = fabs(max_recieved) > max ? fabs(max_recieved) : max;
             sum += sum_recieved;
         }
-        double norm2 = sqrt(sum);
-        double normMax = max;
+        norm2_residual = sqrt(sum);
+        normMax_residual = max;
 
         std::cout << endl;
-        std::cout << std::scientific << "norm2res_local: " << norm2 << std::endl;
-        std::cout << std::scientific << "normMres_local: " << normMax << std::endl;
-		results[3] = norm2;
-		results[4] = normMax;
-
+        std::cout << std::scientific << "norm2res_gloabl: " << norm2_residual << std::endl;
+        std::cout << std::scientific << "normMres_global: " << normMax_residual << std::endl;
+		results[3] = norm2_residual;
+    	results[4] = normMax_residual;
     }
     else
     {
@@ -292,11 +289,11 @@ public:
             if (dom[i + DIM1 * j] == Cell::UNKNOWN)
             {
               double tmp = Solution(real_x(i) * disc.h, real_y(j) * disc.h) * 4 * M_PI * M_PI -
-                           (sol[(i + 0) + DIM1 * (j - 0)] * disc.C +
-                            sol[(i + 1) + DIM1 * (j - 0)] * disc.E +
-                            sol[(i - 1) + DIM1 * (j - 0)] * disc.W +
-                            sol[(i + 0) + DIM1 * (j - 1)] * disc.S +
-                            sol[(i + 0) + DIM1 * (j + 1)] * disc.N);
+                           (sol[(i + 0) + resolution * (j - 0)] * disc.C +
+                            sol[(i + 1) + resolution * (j - 0)] * disc.E +
+                            sol[(i - 1) + resolution * (j - 0)] * disc.W +
+                            sol[(i + 0) + resolution * (j - 1)] * disc.S +
+                            sol[(i + 0) + resolution * (j + 1)] * disc.N);
 
               max = fabs(tmp) > max ? fabs(tmp) : max;
               sum += tmp * tmp;
@@ -309,7 +306,6 @@ public:
     }
 
   }
-
 
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////// calculate error global (not used)
@@ -345,7 +341,7 @@ void error_global()
     }
   };
 
-////////////////////////////////////////////////////////////////////////////////////// calculate error locally 
+/////////////////////////////////////////////////////////////////////////////////////// calculate error locally 
 
   void error_local()
   {
@@ -382,8 +378,15 @@ void error_global()
         std::cout << endl;
         std::cout << std::scientific << "norm2err_global: " << norm2 << std::endl;
         std::cout << std::scientific << "normMerr_global: " << normMax << std::endl;
-		results[5] = norm2;
-		results[6] = normMax;
+
+        if(comparemode)
+        {
+            ofstream outfile;
+            outfile.open("Compare_double.txt", fstream::app);
+            outfile << std::defaultfloat;
+            outfile << resolution << "   " << numberiterations << "   " << norm2_residual << "   " << normMax_residual << "   " << norm2 << "   " << normMax << endl;
+            outfile.close(); 
+        }
     }
     else
     {
@@ -419,6 +422,7 @@ void error_global()
     std::chrono::time_point<std::chrono::high_resolution_clock> start;
     std::chrono::time_point<std::chrono::high_resolution_clock> end;
     double runtime;
+	double runtime_jac;
 
     if (mpi_rank == 0)
         start = std::chrono::high_resolution_clock::now();
@@ -426,31 +430,31 @@ void error_global()
     int iter;
     for (iter = 1; iter <= iterations; ++iter)
     {
-      update();
+      runtime_jac += update();
     }
-
+    numberiterations = iter-1;
 
     if (mpi_rank == 0)
     {
         end = std::chrono::high_resolution_clock::now();
-        runtime =
-            std::chrono::duration_cast<std::chrono::duration<double>>(end - start)
-                .count();
+        runtime = std::chrono::duration_cast<std::chrono::duration<double>>(end - start).count();
 
         std::cout << endl << std::scientific << "runtime " << runtime << std::endl;
         std::cout << std::scientific << "runtime/iter " << runtime / iter << std::endl;
 		results[0] = iterations;
-		results[1] = runtime;
-		results[2] = runtime / iter;
+        results[1] = runtime;
+        results[2] = runtime/iter;
+		results[5] = runtime_jac;
     }
-    
     //assemble_Original_Domain_and_Solution();
   }
 
 //////////////////////////////////////////////////////////////////////////////////////////////// update local solution
 
-  void update()
-  {
+  double update()
+  { double runtime;
+	std::chrono::time_point<std::chrono::high_resolution_clock> start_jac;
+    std::chrono::time_point<std::chrono::high_resolution_clock> end_jac;
     for (int j = 1; j < DIM2 - 1; ++j)
     {
       for (int i = 1; i < DIM1 - 1; ++i)
@@ -470,7 +474,7 @@ void error_global()
     sol.swap(sol2);
 
     ///////////////////////// vertical communication /////////////////////////////////
-
+	start_jac = std::chrono::high_resolution_clock::now();
     if (n > 0)
     {
         double msg_upper[DIM1];
@@ -542,6 +546,9 @@ void error_global()
         string name = "localSolution" + std::to_string(mpi_rank) + "__" + std::to_string(mpi_numproc) + ".txt";
         printLocalSolution(name);
     }
+	end_jac = std::chrono::high_resolution_clock::now();
+	runtime += std::chrono::duration_cast<std::chrono::duration<double>>(end_jac - start_jac).count();
+	return runtime;
 
   };
 
@@ -642,59 +649,6 @@ void error_global()
         
 
     };
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////////// factors for domain decomposition
-
-    void factorization(int R)
-      {
-        int Rc = R;
-        double c = 0;
-        int f[] = {2,3,5,7,11,13,17,19,23,29,31,37,41,43,47,53,59,61,67,71,73,79,83,97,101};
-
-        for (int i = 0; i < 25; i++)
-        {
-            while (R%f[i] == 0)
-            {
-                R /= f[i];
-                c++;
-            }
-        }
-        
-        int factors[int(c)];
-        c = 0;
-            
-        for (int i = 0; i < 13; i++)
-        {
-            while (Rc%f[i] == 0)
-            {
-                Rc /= f[i];
-                factors[int(c)] = f[i];
-                c++;
-            }
-        }
-            if (int(c)%2 == 1)
-            {
-                for (int j = 0; j < std::ceil(c/2.0); j++)
-                {
-                    N *= factors[j];
-                }
-                for (int j = std::ceil(c/2.0); j < c; j++)
-                {
-                    M *= factors[j];
-                }
-            }
-            else
-            {
-                for (int j = 0; j < c; j++)
-                {
-                    if (j%2 == 0)
-                        N *= factors[j];
-                    else
-                        M *= factors[j];
-                }
-            }
-      };
-
 
 ////////////////////////////////////////////////////////////////////////////////////////////// print global Domain (debugging)
 
@@ -835,8 +789,8 @@ void printresults( string name)
 			string file_name = "data/"+name+".csv";
 		    ofstream outfile;
 			outfile.open (file_name);
-			outfile << "iterations,runtime,runtime/iter,norm2res_gloabl,normMres_global\n";
-			outfile << results[0] << "," << results[1] << "," <<  results[2] << "," <<  results[3] << "," <<  results[4] << std::endl;
+			outfile << "iterations,runtime,runtime/iter,norm2res_gloabl,normMres_global,runtime_com,runtime_jac\n";
+			outfile << results[0] << "," << results[1] << "," <<  results[2] << "," <<  results[3] << "," <<  results[4] << "," << results[5]/10 << "," << abs(results[1]-results[5]) << std::endl;
 			outfile << std::defaultfloat;
 		    outfile.close();
 		}

@@ -108,7 +108,9 @@ public:
     rhs_global = std::vector<double>(resolution*resolution, 0);
     dom = std::vector<int>(DIM1 * DIM2, Cell::UNKNOWN);
     dom_global = std::vector<int>(resolution*resolution, Cell::UNKNOWN);
-	results = std::vector<double>(6, 0);
+	results = std::vector<double>(8, 0);
+	runtime(0)=total
+runtimetime(1)= com
 
 ///////////////////////////////////////////////////////////////////////////////////////////// setup local domain
 

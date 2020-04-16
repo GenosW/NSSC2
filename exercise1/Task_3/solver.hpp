@@ -33,10 +33,10 @@ struct Discretization
         C(4.0 / (h * h) + 4 * M_PI * M_PI), N(-1.0 / (h * h)),
         S(-1.0 / (h * h)), W(-1.0 / (h * h)), E(-1.0 / (h * h)) {}
   const int resolution;
-  const double h, C, N, S, W, E;
+  const float h, C, N, S, W, E;
 };
 
-double Solution(double x, double y)
+float Solution(float x, float y)
 {
   return sin(2 * M_PI * x) * sinh(2 * M_PI * y);
 }
@@ -49,19 +49,18 @@ public:
   const Discretization disc;
   int resolution, DIM1, DIM2, M, N, m, n;
 
-  std::vector<double> sol;  // local solution
-  std::vector<double> sol2; // local solution swap
-  std::vector<double> rhs;  // local rhs
+  std::vector<float> sol;  // local solution
+  std::vector<float> sol2; // local solution swap
+  std::vector<float> rhs;  // local rhs
   std::vector<int> dom;     // local domaininfo
-  std::vector<double> sol_global;   // global solution
+  std::vector<float> sol_global;   // global solution
   std::vector<int> dom_global;      // global domaininfo
-  std::vector<double> rhs_global;   // global rhs
-<<<<<<< HEAD
-  std::vector<double> results;   // results
+  std::vector<float> rhs_global;   // global rhs
+  float norm2_residual;
+  float normMax_residual;
+  int numberiterations;
   bool debugmode = false;           // enable to get a bunch of extra information about local domains, local solutions etc. in text files
-=======
-  bool debugmode = true;           // enable to get a bunch of extra information about local domains, local solutions etc. in text files
->>>>>>> 82f4757d88d398856a58d3e70390ccbc6b08ad75
+  bool comparemode = false;         // enable to generate compare files for Task 3
   string name;
 
   int mpi_rank;
@@ -79,15 +78,12 @@ public:
 
     // allocate arrays
     M = 1;
-    N = 1;
-    factorization(mpi_numproc);
+    N = mpi_numproc;
     if(mpi_rank == 0)
-        std::cout << endl << "Calculation of " << resolution << "x" << resolution << " Grid with " << mpi_numproc << " process(es) using 2D decomposition" << endl 
-        << "M: " << M << ", N: " << N << endl;
+        std::cout << endl << "Calculation of " << resolution << "x" << resolution << " Grid with " << mpi_numproc << " process(es) using 1D decomposition" << endl; 
     m = mpi_rank%M;
     n = (mpi_rank-m)/M;
 
-    // Check how many additional (ghost) layers are needed per axis
     int additionalLayer_X = 2;
     int additionalLayer_Y = 2;
     if ( m == 0 || m == M-1 )
@@ -100,22 +96,22 @@ public:
         additionalLayer_Y = 0;
 
     if ( m <= M-2 )
-        DIM1 = (int)std::floor((double)resolution/M) + additionalLayer_X;
+        DIM1 = (int)std::floor((float)resolution/M) + additionalLayer_X;
     else
-        DIM1 = resolution - (int)std::floor((double)resolution/M)*(M-1) + additionalLayer_X;
+        DIM1 = resolution - (int)std::floor((float)resolution/M)*(M-1) + additionalLayer_X;
     if ( n <= N-2 )
-        DIM2 = (int)std::floor((double)resolution/N) + additionalLayer_Y;
+        DIM2 = (int)std::floor((float)resolution/N) + additionalLayer_Y;
     else
-        DIM2 = resolution - (int)std::floor((double)resolution/N)*(N-1) + additionalLayer_Y;
+        DIM2 = resolution - (int)std::floor((float)resolution/N)*(N-1) + additionalLayer_Y;
 
-    sol = std::vector<double>(DIM1 * DIM2, 0);
-    sol2 = std::vector<double>(DIM1 * DIM2, 0);
-    sol_global = std::vector<double>(resolution*resolution, 0);
-    rhs = std::vector<double>(DIM1 * DIM2, 0);
-    rhs_global = std::vector<double>(resolution*resolution, 0);
+    sol = std::vector<float>(DIM1 * DIM2, 0);
+    sol2 = std::vector<float>(DIM1 * DIM2, 0);
+    sol_global = std::vector<float>(resolution*resolution, 0);
+    rhs = std::vector<float>(DIM1 * DIM2, 0);
+    rhs_global = std::vector<float>(resolution*resolution, 0);
     dom = std::vector<int>(DIM1 * DIM2, Cell::UNKNOWN);
     dom_global = std::vector<int>(resolution*resolution, Cell::UNKNOWN);
-    results = std::vector<double>(6, 0);  
+
 ///////////////////////////////////////////////////////////////////////////////////////////// setup local domain
 
     for (int j = 0; j != DIM2; ++j)
@@ -201,8 +197,8 @@ public:
   {
     if ( mpi_rank == 0)
     {
-    double max = 0;
-    double sum = 0;
+    float max = 0;
+    float sum = 0;
     int count = 0;
     for (int j = 0; j != resolution; ++j)
     {
@@ -210,7 +206,7 @@ public:
       {
         if (dom_global[i + resolution * j] == Cell::UNKNOWN)
         {
-          double tmp = Solution(i * disc.h, j * disc.h) * 4 * M_PI * M_PI -
+          float tmp = Solution(i * disc.h, j * disc.h) * 4 * M_PI * M_PI -
                        (sol_global[(i + 0) + resolution * (j - 0)] * disc.C +
                         sol_global[(i + 1) + resolution * (j - 0)] * disc.E +
                         sol_global[(i - 1) + resolution * (j - 0)] * disc.W +
@@ -224,8 +220,8 @@ public:
       }
     }
 
-    double norm2 = sqrt(sum);
-    double normMax = max;
+    float norm2 = sqrt(sum);
+    float normMax = max;
 
     std::cout << endl;
     std::cout << std::scientific << "norm2res_gloabl: " << norm2 << std::endl;
@@ -233,14 +229,15 @@ public:
     }
   };
 
-/////////////////////////////////////////////////////////////////////////////////////// calculate residual locally 
+
+////////////////////////////////////////////////////////////////////////////////////// calculate residual locally 
 
   void residual_local()
   {
     if ( mpi_rank == 0)
     {
-        double max = 0;
-        double sum = 0;
+        float max = 0;
+        float sum = 0;
         int count = 0;
         for (int j = 0; j != DIM2; ++j)
         {
@@ -248,12 +245,12 @@ public:
           {
             if (dom[i + DIM1 * j] == Cell::UNKNOWN)
             {
-              double tmp = Solution(real_x(i) * disc.h, real_y(j) * disc.h) * 4 * M_PI * M_PI -
-                           (sol[(i + 0) + DIM1 * (j - 0)] * disc.C +
-                            sol[(i + 1) + DIM1 * (j - 0)] * disc.E +
-                            sol[(i - 1) + DIM1 * (j - 0)] * disc.W +
-                            sol[(i + 0) + DIM1 * (j - 1)] * disc.S +
-                            sol[(i + 0) + DIM1 * (j + 1)] * disc.N);
+              float tmp = Solution(real_x(i) * disc.h, real_y(j) * disc.h) * 4 * M_PI * M_PI -
+                           (sol[(i + 0) + resolution * (j - 0)] * disc.C +
+                            sol[(i + 1) + resolution * (j - 0)] * disc.E +
+                            sol[(i - 1) + resolution * (j - 0)] * disc.W +
+                            sol[(i + 0) + resolution * (j - 1)] * disc.S +
+                            sol[(i + 0) + resolution * (j + 1)] * disc.N);
 
               max = fabs(tmp) > max ? fabs(tmp) : max;
               sum += tmp * tmp;
@@ -263,27 +260,25 @@ public:
         }
         for (int k = 1; k < mpi_numproc; k++)
         {
-            double max_recieved;
-            double sum_recieved;
-            MPI_Recv(&max_recieved, 1, MPI_DOUBLE, k, MPI_ANY_TAG, MPI_COMM_WORLD, &stat);
-            MPI_Recv(&sum_recieved, 1, MPI_DOUBLE, k, MPI_ANY_TAG, MPI_COMM_WORLD, &stat);
+            float max_recieved;
+            float sum_recieved;
+            MPI_Recv(&max_recieved, 1, MPI_FLOAT, k, MPI_ANY_TAG, MPI_COMM_WORLD, &stat);
+            MPI_Recv(&sum_recieved, 1, MPI_FLOAT, k, MPI_ANY_TAG, MPI_COMM_WORLD, &stat);
             max = fabs(max_recieved) > max ? fabs(max_recieved) : max;
             sum += sum_recieved;
         }
-        double norm2 = sqrt(sum);
-        double normMax = max;
+        norm2_residual = sqrt(sum);
+        normMax_residual = max;
 
         std::cout << endl;
-        std::cout << std::scientific << "norm2res_local: " << norm2 << std::endl;
-        std::cout << std::scientific << "normMres_local: " << normMax << std::endl;
-		results[3] = norm2;
-		results[4] = normMax;
+        std::cout << std::scientific << "norm2res_gloabl: " << norm2_residual << std::endl;
+        std::cout << std::scientific << "normMres_global: " << normMax_residual << std::endl;
 
     }
     else
     {
-        double max = 0;
-        double sum = 0;
+        float max = 0;
+        float sum = 0;
         int count = 0;
         for (int j = 0; j != DIM2; ++j)
         {
@@ -291,12 +286,12 @@ public:
           {
             if (dom[i + DIM1 * j] == Cell::UNKNOWN)
             {
-              double tmp = Solution(real_x(i) * disc.h, real_y(j) * disc.h) * 4 * M_PI * M_PI -
-                           (sol[(i + 0) + DIM1 * (j - 0)] * disc.C +
-                            sol[(i + 1) + DIM1 * (j - 0)] * disc.E +
-                            sol[(i - 1) + DIM1 * (j - 0)] * disc.W +
-                            sol[(i + 0) + DIM1 * (j - 1)] * disc.S +
-                            sol[(i + 0) + DIM1 * (j + 1)] * disc.N);
+              float tmp = Solution(real_x(i) * disc.h, real_y(j) * disc.h) * 4 * M_PI * M_PI -
+                           (sol[(i + 0) + resolution * (j - 0)] * disc.C +
+                            sol[(i + 1) + resolution * (j - 0)] * disc.E +
+                            sol[(i - 1) + resolution * (j - 0)] * disc.W +
+                            sol[(i + 0) + resolution * (j - 1)] * disc.S +
+                            sol[(i + 0) + resolution * (j + 1)] * disc.N);
 
               max = fabs(tmp) > max ? fabs(tmp) : max;
               sum += tmp * tmp;
@@ -304,13 +299,11 @@ public:
             }
           }
         }
-        MPI_Send(&max, 1, MPI_DOUBLE, 0, 1, MPI_COMM_WORLD);
-        MPI_Send(&sum, 1, MPI_DOUBLE, 0, 1, MPI_COMM_WORLD);
+        MPI_Send(&max, 1, MPI_FLOAT, 0, 1, MPI_COMM_WORLD);
+        MPI_Send(&sum, 1, MPI_FLOAT, 0, 1, MPI_COMM_WORLD);
     }
 
   }
-
-
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////// calculate error global (not used)
 
@@ -318,15 +311,15 @@ void error_global()
   {
     if (mpi_rank == 0)
     {
-    double max = 0;
-    double sum = 0;
+    float max = 0;
+    float sum = 0;
     for (int j = 0; j != resolution; ++j)
     {
       for (int i = 0; i != resolution; ++i)
       {
         if (dom_global[i + resolution * j] == Cell::UNKNOWN)
         {
-          double tmp = sol_global[i +resolution * j] -
+          float tmp = sol_global[i +resolution * j] -
                        Solution(i * disc.h, j * disc.h);
 
           max = fabs(tmp) > max ? fabs(tmp) : max;
@@ -335,8 +328,8 @@ void error_global()
       }
     }
 
-    double norm2 = sqrt(sum);
-    double normMax = max;
+    float norm2 = sqrt(sum);
+    float normMax = max;
 
     std::cout << endl;
     std::cout << std::scientific << "norm2err_global: " << norm2 << std::endl;
@@ -345,21 +338,21 @@ void error_global()
     }
   };
 
-////////////////////////////////////////////////////////////////////////////////////// calculate error locally 
+/////////////////////////////////////////////////////////////////////////////////////// calculate error locally 
 
   void error_local()
   {
     if ( mpi_rank == 0)
     {
-        double max = 0;
-        double sum = 0;
+        float max = 0;
+        float sum = 0;
         for (int j = 0; j != DIM2; ++j)
         {
           for (int i = 0; i != DIM1; ++i)
           {
             if (dom[i + DIM1 * j] == Cell::UNKNOWN)
             {
-              double tmp = sol[i +DIM1 * j] -
+              float tmp = sol[i +DIM1 * j] -
                            Solution(real_x(i) * disc.h, real_y(j) * disc.h);
 
               max = fabs(tmp) > max ? fabs(tmp) : max;
@@ -369,33 +362,40 @@ void error_global()
         }
         for (int k = 1; k < mpi_numproc; k++)
         {
-            double max_recieved;
-            double sum_recieved;
-            MPI_Recv(&max_recieved, 1, MPI_DOUBLE, k, MPI_ANY_TAG, MPI_COMM_WORLD, &stat);
-            MPI_Recv(&sum_recieved, 1, MPI_DOUBLE, k, MPI_ANY_TAG, MPI_COMM_WORLD, &stat);
+            float max_recieved;
+            float sum_recieved;
+            MPI_Recv(&max_recieved, 1, MPI_FLOAT, k, MPI_ANY_TAG, MPI_COMM_WORLD, &stat);
+            MPI_Recv(&sum_recieved, 1, MPI_FLOAT, k, MPI_ANY_TAG, MPI_COMM_WORLD, &stat);
             max = fabs(max_recieved) > max ? fabs(max_recieved) : max;
             sum += sum_recieved;
         }
-        double norm2 = sqrt(sum);
-        double normMax = max;
+        float norm2 = sqrt(sum);
+        float normMax = max;
 
         std::cout << endl;
-        std::cout << std::scientific << "norm2err_global: " << norm2 << std::endl;
-        std::cout << std::scientific << "normMerr_global: " << normMax << std::endl;
-		results[5] = norm2;
-		results[6] = normMax;
+        std::cout << std::scientific << "norm2err: " << norm2 << std::endl;
+        std::cout << std::scientific << "normMerr: " << normMax << std::endl;
+
+        if(comparemode)
+        {
+            ofstream outfile;
+            outfile.open("Compare_float.txt", fstream::app);
+            outfile << std::defaultfloat;
+            outfile << resolution << "   " << numberiterations << "   " << norm2_residual << "   " << normMax_residual << "   " << norm2 << "   " << normMax << endl;
+            outfile.close(); 
+        }
     }
     else
     {
-        double max = 0;
-        double sum = 0;
+        float max = 0;
+        float sum = 0;
         for (int j = 0; j != DIM2; ++j)
         {
           for (int i = 0; i != DIM1; ++i)
           {
             if (dom[i + DIM1 * j] == Cell::UNKNOWN)
             {
-              double tmp = sol[i +DIM1 * j] -
+              float tmp = sol[i +DIM1 * j] -
                            Solution(real_x(i) * disc.h, real_y(j) * disc.h);
 
               max = fabs(tmp) > max ? fabs(tmp) : max;
@@ -403,8 +403,8 @@ void error_global()
             }
           }
         }
-        MPI_Send(&max, 1, MPI_DOUBLE, 0, 1, MPI_COMM_WORLD);
-        MPI_Send(&sum, 1, MPI_DOUBLE, 0, 1, MPI_COMM_WORLD);
+        MPI_Send(&max, 1, MPI_FLOAT, 0, 1, MPI_COMM_WORLD);
+        MPI_Send(&sum, 1, MPI_FLOAT, 0, 1, MPI_COMM_WORLD);
     }
 
   }
@@ -418,7 +418,7 @@ void error_global()
 
     std::chrono::time_point<std::chrono::high_resolution_clock> start;
     std::chrono::time_point<std::chrono::high_resolution_clock> end;
-    double runtime;
+    float runtime;
 
     if (mpi_rank == 0)
         start = std::chrono::high_resolution_clock::now();
@@ -428,23 +428,21 @@ void error_global()
     {
       update();
     }
+    numberiterations = iter-1;
 
 
     if (mpi_rank == 0)
     {
         end = std::chrono::high_resolution_clock::now();
         runtime =
-            std::chrono::duration_cast<std::chrono::duration<double>>(end - start)
+            std::chrono::duration_cast<std::chrono::duration<float>>(end - start)
                 .count();
 
         std::cout << endl << std::scientific << "runtime " << runtime << std::endl;
         std::cout << std::scientific << "runtime/iter " << runtime / iter << std::endl;
-		results[0] = iterations;
-		results[1] = runtime;
-		results[2] = runtime / iter;
     }
-    
-    //assemble_Original_Domain_and_Solution();
+
+     //assemble_Original_Domain_and_Solution();
   }
 
 //////////////////////////////////////////////////////////////////////////////////////////////// update local solution
@@ -473,32 +471,32 @@ void error_global()
 
     if (n > 0)
     {
-        double msg_upper[DIM1];
+        float msg_upper[DIM1];
         for (int i = 0; i < DIM1; ++i)
             msg_upper[i] = sol[DIM1+i];
         
-        MPI_Send(msg_upper, DIM1, MPI_DOUBLE, (n-1)*M+m, 1, MPI_COMM_WORLD);
+        MPI_Send(msg_upper, DIM1, MPI_FLOAT, (n-1)*M+m, 1, MPI_COMM_WORLD);
     }
     if (n < N-1)
     {
-        double rec_upper[DIM1];
-        MPI_Recv(rec_upper, DIM1, MPI_DOUBLE, (n+1)*M+m, MPI_ANY_TAG, MPI_COMM_WORLD, &stat);
+        float rec_upper[DIM1];
+        MPI_Recv(rec_upper, DIM1, MPI_FLOAT, (n+1)*M+m, MPI_ANY_TAG, MPI_COMM_WORLD, &stat);
         for (int i = 0; i < DIM1; ++i)
             sol[(DIM2-1)*DIM1+i] = rec_upper[i];
     }
 
     if (n < N-1)
     {
-        double msg_lower[DIM1];
+        float msg_lower[DIM1];
         for (int i = 0; i < DIM1; ++i)
             msg_lower[i] = sol[DIM1*(DIM2-2)+i];
         
-        MPI_Send(msg_lower, DIM1, MPI_DOUBLE, (n+1)*M+m, 1, MPI_COMM_WORLD);
+        MPI_Send(msg_lower, DIM1, MPI_FLOAT, (n+1)*M+m, 1, MPI_COMM_WORLD);
     }
     if (n > 0)
     {
-        double rec_lower[DIM1];
-        MPI_Recv(rec_lower, DIM1, MPI_DOUBLE, (n-1)*M+m, MPI_ANY_TAG, MPI_COMM_WORLD, &stat);
+        float rec_lower[DIM1];
+        MPI_Recv(rec_lower, DIM1, MPI_FLOAT, (n-1)*M+m, MPI_ANY_TAG, MPI_COMM_WORLD, &stat);
         for (int i = 0; i < DIM1; ++i)
             sol[i] = rec_lower[i];
     }
@@ -507,32 +505,32 @@ void error_global()
 
     if (m > 0)
     {
-        double msg_left[DIM2];
+        float msg_left[DIM2];
         for (int j = 0; j < DIM2; ++j)
             msg_left[j] = sol[DIM1*j+1];
         
-        MPI_Send(msg_left, DIM2, MPI_DOUBLE, n*M+m-1, 1, MPI_COMM_WORLD);
+        MPI_Send(msg_left, DIM2, MPI_FLOAT, n*M+m-1, 1, MPI_COMM_WORLD);
     }
     if (m < M-1)
     {
-        double rec_left[DIM2];
-        MPI_Recv(rec_left, DIM2, MPI_DOUBLE, n*M+m+1, MPI_ANY_TAG, MPI_COMM_WORLD, &stat);
+        float rec_left[DIM2];
+        MPI_Recv(rec_left, DIM2, MPI_FLOAT, n*M+m+1, MPI_ANY_TAG, MPI_COMM_WORLD, &stat);
         for (int j = 0; j < DIM2; ++j)
             sol[(DIM1-1)+j*DIM1] = rec_left[j];
     }
 
     if (m < M-1)
     {
-        double msg_right[DIM2];
+        float msg_right[DIM2];
         for (int j = 0; j < DIM2; ++j)
             msg_right[j] = sol[(DIM1-2)+j*DIM1];
         
-        MPI_Send(msg_right, DIM2, MPI_DOUBLE, n*M+m+1, 1, MPI_COMM_WORLD);
+        MPI_Send(msg_right, DIM2, MPI_FLOAT, n*M+m+1, 1, MPI_COMM_WORLD);
     }
     if (m > 0)
     {
-        double rec_right[DIM2];
-        MPI_Recv(rec_right, DIM2, MPI_DOUBLE, n*M+m-1, MPI_ANY_TAG, MPI_COMM_WORLD, &stat);
+        float rec_right[DIM2];
+        MPI_Recv(rec_right, DIM2, MPI_FLOAT, n*M+m-1, MPI_ANY_TAG, MPI_COMM_WORLD, &stat);
         for (int j = 0; j < DIM2; ++j)
             sol[j*DIM1] = rec_right[j];
     }
@@ -545,7 +543,7 @@ void error_global()
 
   };
 
-///////////////////////////////////////////////////////////////////////////////////////////////////// Assemble Original (not used)
+///////////////////////////////////////////////////////////////////////////////////////////////////// Assemble Original
 
     void assemble_Original_Domain_and_Solution()
     {
@@ -583,20 +581,20 @@ void error_global()
                     additionalLayer_Yp = 0;
                 
                 if ( mp <= M-2 )
-                    DIM1p = (int)std::floor((double)resolution/M) + additionalLayer_Xp;
+                    DIM1p = (int)std::floor((float)resolution/M) + additionalLayer_Xp;
                 else
-                    DIM1p = resolution - (int)std::floor((double)resolution/M)*(M-1) + additionalLayer_Xp;
+                    DIM1p = resolution - (int)std::floor((float)resolution/M)*(M-1) + additionalLayer_Xp;
                 if ( np <= N-2 )
-                    DIM2p = (int)std::floor((double)resolution/N) + additionalLayer_Yp;
+                    DIM2p = (int)std::floor((float)resolution/N) + additionalLayer_Yp;
                 else
-                    DIM2p = resolution - (int)std::floor((double)resolution/N)*(N-1) + additionalLayer_Yp;
+                    DIM2p = resolution - (int)std::floor((float)resolution/N)*(N-1) + additionalLayer_Yp;
                 if(debugmode)
                     std::cout << "Rank " << k << " mp: " << mp << " np: " << np << " DIM1p: " << DIM1p << " DIM2p: " << DIM2p << endl;
                 
                 int rec_domain[DIM1p*DIM2p];
-                double rec_sol[DIM1p*DIM2p];
+                float rec_sol[DIM1p*DIM2p];
                 MPI_Recv(rec_domain, DIM1p*DIM2p, MPI_INT, k, MPI_ANY_TAG, MPI_COMM_WORLD, &stat);
-                MPI_Recv(rec_sol, DIM1p*DIM2p, MPI_DOUBLE, k, MPI_ANY_TAG, MPI_COMM_WORLD, &stat);
+                MPI_Recv(rec_sol, DIM1p*DIM2p, MPI_FLOAT, k, MPI_ANY_TAG, MPI_COMM_WORLD, &stat);
 
                 for ( int j = 0; j < DIM2p; j++)
                 {
@@ -604,8 +602,8 @@ void error_global()
                     {
                         if (rec_domain[j*DIM1p + i] != Cell::GHOST)
                         {
-                            global_x_coord = i + mp*(int)std::floor((double)resolution/(double)M) - min(mp,1);
-                            global_y_coord = j + np*(int)std::floor((double)resolution/(double)N) - min(np,1);
+                            global_x_coord = i + mp*(int)std::floor((float)resolution/(float)M) - min(mp,1);
+                            global_y_coord = j + np*(int)std::floor((float)resolution/(float)N) - min(np,1);
                             dom_global[ global_y_coord*resolution + global_x_coord ] = rec_domain[j*DIM1p + i];
                             sol_global[ global_y_coord*resolution + global_x_coord ] = rec_sol[j*DIM1p + i];
                         }
@@ -625,7 +623,7 @@ void error_global()
         if (mpi_rank != 0 )
         {
             int send_domain[DIM1*DIM2];
-            double send_sol[DIM1*DIM2];
+            float send_sol[DIM1*DIM2];
 
             for ( int j = 0; j < DIM2; j++)
             {
@@ -637,64 +635,11 @@ void error_global()
             }
 
             MPI_Send(send_domain, DIM1*DIM2, MPI_INT, 0, 1, MPI_COMM_WORLD);
-            MPI_Send(send_sol, DIM1*DIM2, MPI_DOUBLE, 0, 1, MPI_COMM_WORLD);
+            MPI_Send(send_sol, DIM1*DIM2, MPI_FLOAT, 0, 1, MPI_COMM_WORLD);
         }
         
 
     };
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////////// factors for domain decomposition
-
-    void factorization(int R)
-      {
-        int Rc = R;
-        double c = 0;
-        int f[] = {2,3,5,7,11,13,17,19,23,29,31,37,41,43,47,53,59,61,67,71,73,79,83,97,101};
-
-        for (int i = 0; i < 25; i++)
-        {
-            while (R%f[i] == 0)
-            {
-                R /= f[i];
-                c++;
-            }
-        }
-        
-        int factors[int(c)];
-        c = 0;
-            
-        for (int i = 0; i < 13; i++)
-        {
-            while (Rc%f[i] == 0)
-            {
-                Rc /= f[i];
-                factors[int(c)] = f[i];
-                c++;
-            }
-        }
-            if (int(c)%2 == 1)
-            {
-                for (int j = 0; j < std::ceil(c/2.0); j++)
-                {
-                    N *= factors[j];
-                }
-                for (int j = std::ceil(c/2.0); j < c; j++)
-                {
-                    M *= factors[j];
-                }
-            }
-            else
-            {
-                for (int j = 0; j < c; j++)
-                {
-                    if (j%2 == 0)
-                        N *= factors[j];
-                    else
-                        M *= factors[j];
-                }
-            }
-      };
-
 
 ////////////////////////////////////////////////////////////////////////////////////////////// print global Domain (debugging)
 
@@ -826,33 +771,17 @@ void printLocalRhs( string name)
         outfile.close();   
       };
 
-////////////////////////////////////////////////////////////////////////////////////////////// print resultvector
-
-void printresults( string name)
-      {
-		if (mpi_rank == 0)
-    	{
-			string file_name = "data/"+name+".csv";
-		    ofstream outfile;
-			outfile.open (file_name);
-			outfile << "iterations,runtime,runtime/iter,norm2res_gloabl,normMres_global\n";
-			outfile << results[0] << "," << results[1] << "," <<  results[2] << "," <<  results[3] << "," <<  results[4] << std::endl;
-			outfile << std::defaultfloat;
-		    outfile.close();
-		}
- 	  };
-
 ////////////////////////////////////////////////////////////////////////////////////////////////// real X and Y
 
 int real_x(int i)
     {
-        int x = i + m*(int)std::floor((double)resolution/(double)M) - min(m,1);
+        int x = i + m*(int)std::floor((float)resolution/(float)M) - min(m,1);
         return x;
     };
 
 int real_y(int j)
     {
-        int y = j + n*(int)std::floor((double)resolution/(double)N) - min(n,1);
+        int y = j + n*(int)std::floor((float)resolution/(float)N) - min(n,1);
         return y;
     };
 

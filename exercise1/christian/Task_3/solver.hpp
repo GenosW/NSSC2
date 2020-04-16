@@ -56,7 +56,11 @@ public:
   std::vector<float> sol_global;   // global solution
   std::vector<int> dom_global;      // global domaininfo
   std::vector<float> rhs_global;   // global rhs
+  float norm2_residual;
+  float normMax_residual;
+  int numberiterations;
   bool debugmode = false;           // enable to get a bunch of extra information about local domains, local solutions etc. in text files
+  bool comparemode = true;
   string name;
 
   int mpi_rank;
@@ -263,12 +267,13 @@ public:
             max = fabs(max_recieved) > max ? fabs(max_recieved) : max;
             sum += sum_recieved;
         }
-        float norm2 = sqrt(sum);
-        float normMax = max;
+        norm2_residual = sqrt(sum);
+        normMax_residual = max;
 
         std::cout << endl;
-        std::cout << std::scientific << "norm2res_gloabl: " << norm2 << std::endl;
-        std::cout << std::scientific << "normMres_global: " << normMax << std::endl;
+        std::cout << std::scientific << "norm2res_gloabl: " << norm2_residual << std::endl;
+        std::cout << std::scientific << "normMres_global: " << normMax_residual << std::endl;
+
     }
     else
     {
@@ -368,8 +373,17 @@ void error_global()
         float normMax = max;
 
         std::cout << endl;
-        std::cout << std::scientific << "norm2err_global: " << norm2 << std::endl;
-        std::cout << std::scientific << "normMerr_global: " << normMax << std::endl;
+        std::cout << std::scientific << "norm2err: " << norm2 << std::endl;
+        std::cout << std::scientific << "normMerr: " << normMax << std::endl;
+
+        if(comparemode)
+        {
+            ofstream outfile;
+            outfile.open("Test.txt", fstream::app);
+            outfile << std::defaultfloat;
+            outfile << resolution << "   " << numberiterations << "   " << norm2_residual << "   " << normMax_residual << "   " << norm2 << "   " << normMax << endl;
+            outfile.close(); 
+        }
     }
     else
     {
@@ -414,6 +428,7 @@ void error_global()
     {
       update();
     }
+    numberiterations = iter-1;
 
 
     if (mpi_rank == 0)
