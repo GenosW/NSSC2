@@ -75,6 +75,7 @@ public:
 
   int mpi_rank;
   int mpi_numproc;
+  int rank_upperNeighbor, rank_lowerNeighbor, rank_leftNeighbor, rank_rightNeighbor;
 
   ~Field(){ }
   Field(int resolution ,int rank, int numproc) : disc(resolution), resolution(resolution), mpi_rank(rank), mpi_numproc(numproc)
@@ -87,8 +88,8 @@ public:
     }
 
     // allocate arrays
-    M = 1;
-    N = mpi_numproc;
+    M = 1; // num of proc in x
+    N = mpi_numproc; // num of proc in y
     if(mpi_rank == 0)
         std::cout << endl << "Calculation of " << resolution << "x" << resolution << " Grid with " << mpi_numproc << " process(es) using 1D decomposition" << endl; 
     m = mpi_rank%M;
@@ -105,6 +106,10 @@ public:
         additionalLayer_Y = 1;
     if (mpi_numproc == 1)
         additionalLayer_Y = 0;
+    rank_upperNeighbor = (n-1)*M+m;
+    rank_lowerNeighbor = (n+1)*M+m;
+    rank_leftNeighbor = n*M+m-1;
+    rank_rightNeighbor = n*M+m+1;
 
     if ( m <= M-2 )
         DIM1 = (int)std::floor((double)resolution/M) + additionalLayer_X;
@@ -247,66 +252,108 @@ public:
     sol.swap(sol2);
 
     ///////////////////////// vertical communication /////////////////////////////////
-
-    if (n > 0) // n...position of process/decomposition in vertical dimension
+    MPI_Request req_upper, req_lower, req_left, req_right;
+    if (n > 0 && rank_upperNeighbor >= 0) // n...position of process/decomposition in vertical dimension
     {
+        
         for (int i = 0; i < DIM1; ++i)
             msg_upper[i] = sol[DIM1+i];
         
-        MPI_Send(msg_upper.data(), DIM1, MPI_DOUBLE, (n-1)*M+m, 1, MPI_COMM_WORLD);
+        MPI_Isend(msg_upper.data(), DIM1, MPI_DOUBLE, // triplet of buffer, size, data type
+                  rank_upperNeighbor, // target: (n-1)*M+m,upper neighbor
+                  1,
+                  MPI_COMM_WORLD,
+                  &req_upper);
     }
-    if (n < N-1)
+    if (n < N-1 && rank_lowerNeighbor <= N)
     {
-        MPI_Recv(rec_upper.data(), DIM1, MPI_DOUBLE, (n+1)*M+m, MPI_ANY_TAG, MPI_COMM_WORLD, &stat);
+        MPI_Recv(rec_upper.data(), DIM1, MPI_DOUBLE,
+                rank_lowerNeighbor, // target: (n+1)*M+m --> lower neighbor
+                1, //MPI_ANY_TAG,
+                MPI_COMM_WORLD, 
+                &stat);
         for (int i = 0; i < DIM1; ++i)
             sol[(DIM2-1)*DIM1+i] = rec_upper[i];
     }
-
+    if (n > 0 && rank_upperNeighbor >= 0) // n...position of process/decomposition in vertical dimension
+    {
+        MPI_Wait(&req_upper, &stat); // Is upper vert comm done?
+    }
+    // If upper vert comm done --> do lower vert communication
     if (n < N-1)
     {
         for (int i = 0; i < DIM1; ++i)
             msg_lower[i] = sol[DIM1*(DIM2-2)+i];
         
-        MPI_Send(msg_lower.data(), DIM1, MPI_DOUBLE, (n+1)*M+m, 1, MPI_COMM_WORLD);
+        MPI_Isend(msg_lower.data(), DIM1, MPI_DOUBLE, 
+                rank_lowerNeighbor, // (n+1)*M+m,
+                2,
+                MPI_COMM_WORLD,
+                &req_lower);
     }
     if (n > 0)
     {
-        MPI_Recv(rec_lower.data(), DIM1, MPI_DOUBLE, (n-1)*M+m, MPI_ANY_TAG, MPI_COMM_WORLD, &stat);
+        MPI_Recv(rec_lower.data(), DIM1, MPI_DOUBLE,
+                  rank_upperNeighbor,
+                  2, //MPI_ANY_TAG,
+                  MPI_COMM_WORLD,
+                  &stat);
         for (int i = 0; i < DIM1; ++i)
             sol[i] = rec_lower[i];
     }
-
-    ///////////////////////// horizontal communication /////////////////////////////////
-    if (m > 0)
+    if (n < N-1)
     {
-        //MPI_Request *req_left;
-        for (int j = 0; j < DIM2; ++j)
-            msg_left[j] = sol[DIM1*j+1];
-        
-        MPI_Send(msg_left.data(), DIM2, MPI_DOUBLE, n*M+m-1, 1, MPI_COMM_WORLD);//, req_left);
+        MPI_Wait(&req_lower, &stat); // Is lower vert comm done?
     }
-    if (m < M-1)
-    {
-        MPI_Recv(rec_left.data(), DIM2, MPI_DOUBLE, n*M+m+1, MPI_ANY_TAG, MPI_COMM_WORLD, &stat);
-        for (int j = 0; j < DIM2; ++j)
-            sol[(DIM1-1)+j*DIM1] = rec_left[j];
-    }
-
-    if (m < M-1)
-    {
-        for (int j = 0; j < DIM2; ++j)
-            msg_right[j] = sol[(DIM1-2)+j*DIM1];
-        
-        MPI_Send(msg_right.data(), DIM2, MPI_DOUBLE, n*M+m+1, 1, MPI_COMM_WORLD);
-    }
-    if (m > 0)
-    {
-        MPI_Recv(rec_right.data(), DIM2, MPI_DOUBLE, n*M+m-1, MPI_ANY_TAG, MPI_COMM_WORLD, &stat);
-        for (int j = 0; j < DIM2; ++j)
-            sol[j*DIM1] = rec_right[j];
-    }
-    //MPI_Wait(,)
-
+    // if (M!=1){
+    //   // If lower + upper vert comm done --> do horizontal communication
+    //   ///////////////////////// horizontal communication /////////////////////////////////
+    //   // left horizontal comm
+    //   if (m > 0)
+    //   {
+    //       for (int j = 0; j < DIM2; ++j)
+    //           msg_left[j] = sol[DIM1*j+1];
+          
+    //       MPI_Isend(msg_left.data(), DIM2, MPI_DOUBLE,
+    //                 rank_leftNeighbor, // n*M+m-1,
+    //                 3,
+    //                 MPI_COMM_WORLD,
+    //                 &req_left);//, req_left);
+    //   }
+    //   if (m < M-1)
+    //   {
+    //       MPI_Recv(rec_left.data(), DIM2, MPI_DOUBLE, 
+    //                 rank_rightNeighbor, // n*M+m+1,
+    //                 MPI_ANY_TAG,
+    //                 MPI_COMM_WORLD,
+    //                 &stat);
+    //       for (int j = 0; j < DIM2; ++j)
+    //           sol[(DIM1-1)+j*DIM1] = rec_left[j];
+    //   }
+    //   MPI_Wait(&req_left, &stat); // Is left hori comm done?
+    //   // If left hori comm done --> do right horizontal communication
+    //   if (m < M-1)
+    //   {
+    //       for (int j = 0; j < DIM2; ++j)
+    //           msg_right[j] = sol[(DIM1-2)+j*DIM1];
+          
+    //       MPI_Isend(msg_right.data(), DIM2, MPI_DOUBLE, 
+    //                 rank_rightNeighbor,
+    //                 4,
+    //                 MPI_COMM_WORLD,
+    //                 &req_right);
+    //   }
+    //   if (m > 0)
+    //   {
+    //       MPI_Recv(rec_right.data(), DIM2, MPI_DOUBLE, rank_leftNeighbor,
+    //                 MPI_ANY_TAG,
+    //                 MPI_COMM_WORLD,
+    //                 &stat);
+    //       for (int j = 0; j < DIM2; ++j)
+    //           sol[j*DIM1] = rec_right[j];
+    //   }
+    //   MPI_Wait(&req_right, &stat); // Is right hori comm done? --> Is all comm done?
+    // }
     if(debugmode)
     {
         string name = "localSolution" + std::to_string(mpi_rank) + "__" + std::to_string(mpi_numproc) + ".txt";
