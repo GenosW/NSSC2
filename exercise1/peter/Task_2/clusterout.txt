@@ -1,0 +1,68 @@
+srun: Warning: can't run 1 processes on 2 nodes, setting nnodes to 1
+
+Calculation of 2000x2000 Grid with 1 process(es) using 1D decomposition
+
+runtime 1.423967e-01
+runtime/iter 8.899797e-03
+
+norm2res_gloabl: 3.799484e+09
+normMres_global: 6.490257e+07
+
+norm2err_global: 1.057061e+05
+normMerr_global: 2.601958e+02
+
+Calculation of 2000x2000 Grid with 4 process(es) using 1D decomposition
+
+runtime 4.551827e-02
+runtime/iter 2.844892e-03
+
+norm2res_gloabl: 3.799484e+09
+normMres_global: 6.490257e+07
+
+norm2err_global: 1.057061e+05
+normMerr_global: 2.601958e+02
+
+Calculation of 2000x2000 Grid with 8 process(es) using 1D decomposition
+
+runtime 2.257378e-02
+runtime/iter 1.410861e-03
+
+norm2res_gloabl: 3.799484e+09
+normMres_global: 6.490257e+07
+
+norm2err_global: 1.057061e+05
+normMerr_global: 2.601958e+02
+
+Calculation of 2000x2000 Grid with 16 process(es) using 1D decomposition
+
+runtime 1.864235e-02
+runtime/iter 1.165147e-03
+
+norm2res_gloabl: 3.799484e+09
+normMres_global: 6.490257e+07
+
+norm2err_global: 1.057061e+05
+normMerr_global: 2.601958e+02
+
+Calculation of 2000x2000 Grid with 32 process(es) using 1D decomposition
+
+runtime 3.141640e-02
+runtime/iter 1.963525e-03
+
+norm2res_gloabl: 3.799484e+09
+normMres_global: 6.490257e+07
+
+norm2err_global: 1.057061e+05
+normMerr_global: 2.601958e+02
+srun: Warning: can't honor --ntasks-per-node set to 40 which doesn't match the requested tasks 64 with the number of requested nodes 2. Ignoring --ntasks-per-node.
+
+Calculation of 2000x2000 Grid with 64 process(es) using 1D decomposition
+
+runtime 5.827512e-03
+runtime/iter 3.642195e-04
+
+norm2res_gloabl: 3.799484e+09
+normMres_global: 6.490257e+07
+
+norm2err_global: 1.057061e+05
+normMerr_global: 2.601958e+02

@@ -3,19 +3,18 @@
 #include <iomanip>
 #include <iostream>
 #include <vector>
-#include <string.h>
 #ifdef USEMPI
 #include <mpi.h>
 #endif
 #include "arguments.hpp"
 #include "solver.hpp"
+#include <math.h>
 
 int main(int argc, char *argv[])
 {
   int rank=0;
   int numproc=1;
-  string name;
-  bool comparemode = false; // for generating compare files for Task 3
+  bool comparemode = false;     // enable to generate compare files for Task 3
 #ifdef USEMPI
   MPI_Init(NULL, NULL);
   MPI_Comm_size(MPI_COMM_WORLD, &numproc);
@@ -31,14 +30,11 @@ int main(int argc, char *argv[])
   assert(resolution > 3);
   if(!comparemode)
   {
-      Field<float> field(resolution,rank,numproc, 1);
-
-      //name = "data/"+to_string(resolution)+","+"Num_of_proc"+","+to_string(numproc);
+      auto field = Field(resolution,rank,numproc);
 
       field.solve(iterations);
       field.residual_local();
       field.error_local();
-      //field.printResults(name);
   }
   if(comparemode)
   {
@@ -46,7 +42,7 @@ int main(int argc, char *argv[])
     {
         for (int j = 0; j <= 7; j++)
         {
-            Field<float> field(std::pow(2,i),rank,numproc, 1);
+            auto field = Field(std::pow(2,i),rank,numproc);
             field.solve(std::pow(10,j));
             field.residual_local();
             field.error_local();

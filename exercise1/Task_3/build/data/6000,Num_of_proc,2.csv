@@ -1,0 +1,2 @@
+iterations,runtime,runtime/iter,norm2res_gloabl,normMres_global,runtime_com,runtime_jac
+10,2.82167,0.256515,7.87209e+10,8.31075e+08,2.82166,2.494e-06
