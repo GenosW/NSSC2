@@ -426,11 +426,11 @@ public:
             if (dom[i + DIM1 * j] == Cell::UNKNOWN)
             {
               P tmp = Solution(real_x(i) * disc.h, real_y(j) * disc.h) * 4 * M_PI * M_PI -
-                           (sol[(i + 0) + resolution * (j - 0)] * disc.C +
-                            sol[(i + 1) + resolution * (j - 0)] * disc.E +
-                            sol[(i - 1) + resolution * (j - 0)] * disc.W +
-                            sol[(i + 0) + resolution * (j - 1)] * disc.S +
-                            sol[(i + 0) + resolution * (j + 1)] * disc.N);
+                           (sol[(i + 0) + DIM1 * (j - 0)] * disc.C +
+                            sol[(i + 1) + DIM1 * (j - 0)] * disc.E +
+                            sol[(i - 1) + DIM1 * (j - 0)] * disc.W +
+                            sol[(i + 0) + DIM1 * (j - 1)] * disc.S +
+                            sol[(i + 0) + DIM1 * (j + 1)] * disc.N);
 
               max = fabs(tmp) > max ? fabs(tmp) : max;
               sum += tmp * tmp;
@@ -468,11 +468,11 @@ public:
             if (dom[i + DIM1 * j] == Cell::UNKNOWN)
             {
               P tmp = Solution(real_x(i) * disc.h, real_y(j) * disc.h) * 4 * M_PI * M_PI -
-                           (sol[(i + 0) + resolution * (j - 0)] * disc.C +
-                            sol[(i + 1) + resolution * (j - 0)] * disc.E +
-                            sol[(i - 1) + resolution * (j - 0)] * disc.W +
-                            sol[(i + 0) + resolution * (j - 1)] * disc.S +
-                            sol[(i + 0) + resolution * (j + 1)] * disc.N);
+                           (sol[(i + 0) + DIM1 * (j - 0)] * disc.C +
+                            sol[(i + 1) + DIM1 * (j - 0)] * disc.E +
+                            sol[(i - 1) + DIM1 * (j - 0)] * disc.W +
+                            sol[(i + 0) + DIM1 * (j - 1)] * disc.S +
+                            sol[(i + 0) + DIM1 * (j + 1)] * disc.N);
 
               max = fabs(tmp) > max ? fabs(tmp) : max;
               sum += tmp * tmp;

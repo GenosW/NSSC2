@@ -17,6 +17,19 @@ else  # if on local machine
     alias srun='mpirun' 
     mpiproc=4
 fi
+res = 250
+int = 15
 
-srun -n $mpiproc ./jacobiMPI 2000 15
-
+srun -n 1 ./jacobiMPI $res $int
+srun -n 2 ./jacobiMPI $res $int
+srun -n 4 ./jacobiMPI $res $int
+srun -n 5 ./jacobiMPI $res $int
+srun -n 8 ./jacobiMPI $res $int
+srun -n 12 ./jacobiMPI $res $int
+srun -n 16 ./jacobiMPI $res $int
+srun -n 24 ./jacobiMPI $res $int
+srun -n 32 ./jacobiMPI $res $int
+srun -n 40 ./jacobiMPI $res $int
+srun -n 50 ./jacobiMPI $res $int
+srun -n 64 ./jacobiMPI $res $int
+srun -n 80 ./jacobiMPI $res $int
