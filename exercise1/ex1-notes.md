@@ -1,5 +1,11 @@
 # NSSC 2 - Exercise 1
 
+WSL settings tweaked:
+
+```bash
+sudo vim /etc/sysctl.d/10-ptrace.conf
+```
+
 ## Task 1: Questions
 
 [Info on Cache organization](https://en.wikichip.org/wiki/intel/xeon_gold/6248) --> Cascade Lake
