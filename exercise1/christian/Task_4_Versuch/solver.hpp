@@ -71,7 +71,7 @@ public:
   P norm2_residual;
   P normMax_residual;
   int numberiterations;
-  bool debugmode = false;           // enable to get a bunch of extra information about local domains, local solutions etc. in text files
+  bool debugmode = true;           // enable to get a bunch of extra information about local domains, local solutions etc. in text files
   bool comparemode = false;         // enable to generate compare file for Task 3
   string name;
   std::vector<P> results; // results array
@@ -309,17 +309,16 @@ public:
     std::chrono::time_point<std::chrono::high_resolution_clock> startCom;
     if (mpi_rank == 0) {startCom = std::chrono::high_resolution_clock::now();};
     ///////////////////////// vertical communication /////////////////////////////////
-    MPI_Request req_upper, req_lower, req_left, req_right;
+    //MPI_Request req_upper, req_lower, req_left, req_right;
     if (n > 0) // n...position of process/decomposition in vertical dimension
     {
       for (int i = 0; i < DIM1; ++i)
           msg_upper[i] = sol[DIM1+i];
       
-      MPI_Isend(msg_upper.data(), DIM1, PREC_MPI, // triplet of buffer, size, data type
+      MPI_Send(msg_upper.data(), DIM1, PREC_MPI, // triplet of buffer, size, data type
                 rank_upperNeighbor, // target: (n-1)*M+m,upper neighbor
                 1,
-                MPI_COMM_WORLD,
-                &req_upper);
+                MPI_COMM_WORLD);
     }
     if (n < N-1)
     {
@@ -331,21 +330,17 @@ public:
       for (int i = 0; i < DIM1; ++i)
           sol[(DIM2-1)*DIM1+i] = rec_upper[i];
     }
-    if (n > 0 && rank_upperNeighbor >= 0) // n...position of process/decomposition in vertical dimension
-    {
-        MPI_Wait(&req_upper, &stat); // Is upper vert comm done?
-    }
+    
     // If upper vert comm done --> do lower vert communication
     if (n < N-1)
     {
       for (int i = 0; i < DIM1; ++i)
           msg_lower[i] = sol[DIM1*(DIM2-2)+i];
       
-      MPI_Isend(msg_lower.data(), DIM1, PREC_MPI, 
+      MPI_Send(msg_lower.data(), DIM1, PREC_MPI, 
               rank_lowerNeighbor, // (n+1)*M+m,
               2,
-              MPI_COMM_WORLD,
-              &req_lower);
+              MPI_COMM_WORLD);
     }
     if (n > 0)
     {
@@ -357,10 +352,7 @@ public:
       for (int i = 0; i < DIM1; ++i)
           sol[i] = rec_lower[i];
     }
-    if (n < N-1)
-    {
-        MPI_Wait(&req_lower, &stat); // Is lower vert comm done?
-    }
+ 
     if (decomp_mode > 1){
       // If lower + upper vert comm done --> do horizontal communication
       ///////////////////////// horizontal communication /////////////////////////////////
@@ -370,11 +362,10 @@ public:
         for (int j = 0; j < DIM2; ++j)
             msg_left[j] = sol[DIM1*j+1];
         
-        MPI_Isend(msg_left.data(), DIM2, PREC_MPI,
+        MPI_Send(msg_left.data(), DIM2, PREC_MPI,
                   rank_leftNeighbor, // n*M+m-1,
                   3,
-                  MPI_COMM_WORLD,
-                  &req_left);//, req_left);
+                  MPI_COMM_WORLD);//, req_left);
       }
       if (m < M-1)
       {
@@ -386,20 +377,17 @@ public:
         for (int j = 0; j < DIM2; ++j)
             sol[(DIM1-1)+j*DIM1] = rec_left[j];
       }
-      if (m > 0){
-        MPI_Wait(&req_left, &stat); // Is left hori comm done?
-      }
+ 
       //If left hori comm done --> do right horizontal communication
       if (m < M-1)
       {
         for (int j = 0; j < DIM2; ++j)
             msg_right[j] = sol[(DIM1-2)+j*DIM1];
         
-        MPI_Isend(msg_right.data(), DIM2, PREC_MPI, 
+        MPI_Send(msg_right.data(), DIM2, PREC_MPI, 
                   rank_rightNeighbor,
                   4,
-                  MPI_COMM_WORLD,
-                  &req_right);
+                  MPI_COMM_WORLD);
       }
       if (m > 0)
       {
@@ -411,9 +399,7 @@ public:
         for (int j = 0; j < DIM2; ++j)
             sol[j*DIM1] = rec_right[j];
       }
-      if (m < M-1){
-        MPI_Wait(&req_right, &stat); // Is right hori comm done? --> Is all comm done?
-      }
+
     }
     std::chrono::time_point<std::chrono::high_resolution_clock> endCom;
     if (mpi_rank == 0) {
