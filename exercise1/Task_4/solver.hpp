@@ -54,9 +54,6 @@ public:
   std::vector<P> sol2; // local solution swap
   std::vector<P> rhs;  // local rhs
   std::vector<int> dom;     // local domaininfo
-  //std::vector<P> sol_global;   // global solution
-  //std::vector<int> dom_global;      // global domaininfo
-  //std::vector<P> rhs_global;   // global rhs
   // COM arrays/vectors
   // vertical communication
   std::vector<P> msg_upper;
@@ -171,11 +168,8 @@ public:
 
     sol = std::vector<P>(DIM1 * DIM2, 0);
     sol2 = std::vector<P>(DIM1 * DIM2, 0);
-    //sol_global = std::vector<P>(resolution*resolution, 0);
     rhs = std::vector<P>(DIM1 * DIM2, 0);
-    //rhs_global = std::vector<P>(resolution*resolution, 0);
     dom = std::vector<int>(DIM1 * DIM2, Cell::UNKNOWN);
-    //dom_global = std::vector<int>(resolution*resolution, Cell::UNKNOWN);
 	  results = std::vector<P>(3, 0);
     // vertical communication
     msg_upper = std::vector<P>(DIM1, 0);
