@@ -299,7 +299,7 @@ public:
     if (mpi_rank == 0) {startCom = std::chrono::high_resolution_clock::now();};
     ///////////////////////// vertical communication /////////////////////////////////
     MPI_Request req_upper, req_lower, req_left, req_right;
-    if (n > 0 && rank_upperNeighbor >= 0) // n...position of process/decomposition in vertical dimension
+    if (n > 0) // n...position of process/decomposition in vertical dimension
     {
         for (int i = 0; i < DIM1; ++i)
             msg_upper[i] = sol[DIM1+i];
@@ -310,7 +310,7 @@ public:
                   MPI_COMM_WORLD,
                   &req_upper);
     }
-    if (n < N-1 && rank_lowerNeighbor <= N)
+    if (n < N-1)
     {
         MPI_Recv(rec_upper.data(), DIM1, PREC_MPI,
                 rank_lowerNeighbor, // target: (n+1)*M+m --> lower neighbor
