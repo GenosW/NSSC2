@@ -15,10 +15,10 @@ CXXFLAGS := $(CXXFLAGS) -std=c++14 -O3 -Wall -pedantic -march=native -ffast-math
 jacobiSERIAL: Makefile main.cpp solver.hpp arguments.hpp 
 	$(CXX) main.cpp -o build/jacobiSERIAL $(CXXFLAGS)
 
-jacobiMPI: Makefile main.cpp solver.hpp arguments.hpp
+jacobiMPI2D: Makefile main.cpp solver.hpp arguments.hpp
 	$(MPICXX) main.cpp -o build/jacobiMPI2D -lpthread -DUSEMPI $(CXXFLAGS)
 
 .PHONY: clean
 
 clean:
-	rm jacobiSERIAL jacobiMPI
+	rm jacobiSERIAL jacobiMPI2D
