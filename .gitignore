@@ -1,3 +1,5 @@
 .vscode
 .env
 jacobiMPI
+jacobiMPI2D
+jacobiSERIAL
