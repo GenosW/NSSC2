@@ -13,7 +13,7 @@
 #include <numeric>
 //#ifdef USEMPI
 #include <mpi.h>
-//#include <mpi/mpi.h>
+//#include <mpi.h>
 //#endif
 namespace nssc
 {
