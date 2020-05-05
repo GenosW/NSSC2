@@ -63,8 +63,6 @@ class Simulation_box:
                 vel.append([vx,vy,vz])
         return L, M, pos, vel
 
-        return L, M, positions, velocities
-
     def saveSnapshot(self, path):
         pass
 
