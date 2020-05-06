@@ -1,3 +1,8 @@
+import jax.numpy as np 
+
+arr = np.zeros((3,3))
+print(arr)
+
 
 path = 'snap.txt'
 M = None
