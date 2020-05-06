@@ -1,11 +1,14 @@
 #!D:\Studium\Code\NSSC\NSSC2\exercise2\molecular_dynamics\md\Scripts\python.exe
 # import numpy as np
 # from numpy.random import default_rng
-import jax.numpy as np
+import jax
+from jax import grad, jit, vmap
+import scipy
+import numpy
 
 class Simulation_box:
     name = 'Simulation box'
-    sig = 1/np.power(2, 1/6)
+    sig = 1/numpy.power(2, 1/6)
 
     def __init__(self, M:int =3, L:float =1, Sigma:float = 0.5, description:str ='some simulation', path:str =''):
         if path:
@@ -20,24 +23,42 @@ class Simulation_box:
             self.positions =  self.generateInitialPositions(L, M) # like np.array((3,M))
             self.velocities =  self.generateInitialVelocities(M, Sigma)
         self.description = description
+        self.EpotD = grad(self.Epot)
 
     @staticmethod
     def generateInitialPositions(L, M):
-        return L*np.random.rand(3,M)
+        return L*numpy.random.rand(3,M)
 
     @staticmethod
     def generateInitialVelocities(M, Sigma):
-        mean = np.zeros(3)
-        cov = Sigma * np.diag(mean, k=0)
-        return np.random.multivariate_normal(mean,cov)
+        mean = numpy.zeros(3)
+        cov = Sigma * numpy.diag(mean, k=0)
+        return numpy.random.multivariate_normal(mean,cov)
 
     def Vlj(self, r):
-        return 4*[np.power(self.sig/r, 12) - np.power(self.sig/r, 6)]
+        return 4*(numpy.power(self.sig/r, 12) - numpy.power(self.sig/r, 6))
 
-    def Epot(self, positions):
-        dist_list = np.array([[xi.getDist(xj) for xj in molecules[i+1:]] for i, xi in enumerate(molecules)]).flatten()
-        energy = np.sum(self.Vlj(dist_list))
+    def Epot(self, pos):
+        pos = pos.reshape((3,self.M))
+        energy = 0
+        for i in range(self.M-1):
+            for j in list(range(i+1,self.M)):
+                deltaX = pos[0,i] - pos[0,j]
+                deltaXmi = deltaX - self.L * numpy.round(deltaX/self.L)
+                deltaY = pos[1,i] - pos[1,j]
+                deltaYmi = deltaY - self.L * numpy.round(deltaY/self.L)
+                deltaZ = pos[2,i] - pos[2,j]
+                deltaZmi = deltaZ - self.L * numpy.round(deltaZ/self.L)
+                r = numpy.linalg.norm([deltaXmi, deltaYmi, deltaZmi])
+                energy += self.Vlj(r)
+                
         return energy
+
+
+    
+    def moveToMinimumEnergy(self):
+        newPositions = scipy.optimize.minimize(self.Epot, self.positions.reshape(3*self.M), jac=self.EpotD, method='CG')
+        self.positions = newPositions.reshape(3,self.M)
 
     def Verlet(self, molecules):
         pass

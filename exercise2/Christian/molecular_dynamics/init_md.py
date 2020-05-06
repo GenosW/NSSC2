@@ -8,6 +8,7 @@ Takes 3 command line arguments (callable as above):
     Sigma... a standard deviation for the velocity distribution
 '''
 from scipy.optimize import minimize
+import numpy as np
 from numpy.random import multivariate_normal
 from argparse import ArgumentParser
 from simulation import Simulation_box, Trajectory
@@ -29,3 +30,6 @@ if __name__ == "__main__":
     print(f"Sigma = {Sigma}")
     sim = Simulation_box(M, L)
     print(sim.positions)
+    print(sim.Epot(sim.positions.reshape(3*M)))
+    sim.moveToMinimumEnergy()
+    #print(sim.Epot(sim.positions.reshape(3*M)))
