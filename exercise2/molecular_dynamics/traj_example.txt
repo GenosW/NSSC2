@@ -1,0 +1,45 @@
+Number of atoms (integer) 
+Arbitrary comment/description (free format)
+Box side length (decimal number)
+x1 y1 z1 vx1 vy1 vz1 // t=0
+.
+.
+.
+xM yM zM vxM vyM vzM  //M+3
+x1 y1 z1 vx1 vy1 vz1 // t=1
+.
+.
+.
+xM yM zM vxM vyM vzM  //M+3
+x1 y1 z1 vx1 vy1 vz1 // t=2
+.
+.
+.
+xM yM zM vxM vyM vzM  //M+3
+###############################
+            vs
+###############################
+Number of atoms (integer) 
+Arbitrary comment/description (free format)
+Box side length (decimal number)
+x1 y1 z1 vx1 vy1 vz1 // t=0
+.
+.
+.
+xM yM zM vxM vyM vzM  //M+3
+Number of atoms (integer) 
+Arbitrary comment/description (free format)
+Box side length (decimal number)
+x1 y1 z1 vx1 vy1 vz1 // t=1
+.
+.
+.
+xM yM zM vxM vyM vzM  //M+3
+Number of atoms (integer) 
+Arbitrary comment/description (free format)
+Box side length (decimal number)
+x1 y1 z1 vx1 vy1 vz1 // t=2
+.
+.
+.
+xM yM zM vxM vyM vzM  //M+3
