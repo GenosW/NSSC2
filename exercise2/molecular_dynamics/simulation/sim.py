@@ -31,13 +31,17 @@ def Epot_lj(positions, L:float, M:int):
 
 grad_Epot = jit(grad(Epot_lj), static_argnums=(1, 2))
 
-
-def Verlet(self, x, v, f, dt):
-    #forces = -grad_Epot(x)
-    new_x = x + (v + dt / 2 * f) * dt
-    new_f = -grad_Epot(new_x)
-    new_v = v + (f + new_f) * dt / 2
-    return new_x, new_v, new_f
+def Verlet(x, v, dt, M, L):
+    f = -grad_Epot(x.ravel(), L, M).reshape(M,3)
+    x_new = numpy.zeros((M,3))
+    v_new = numpy.zeros((M,3))
+    for i in range(M):
+        x_new[i,:] = x[i,:] + v[i,:]*dt + 0.5*f[i,:]*dt*dt
+    f_new = -grad_Epot(x_new.ravel(), L, M).reshape(M,3)
+    for i in range(M):
+        v_new[i,:] = v[i,:] + 0.5*f[i,:]*dt + 0.5*f_new[i,:]*dt
+    
+    return x_new, v_new
 
 
 class Simulation_box:
@@ -78,8 +82,8 @@ class Simulation_box:
         cov = Sigma * np.diag(mean, k=0)
         return numpy.random.multivariate_normal(0 * mean, cov,
                                                 size=M)  #.transpose()
-
-    def loadSnapshot(self, path, M=None):
+    @staticmethod
+    def loadSnapshot(path, M=None):
         pos = []
         vel = []
         with open(path, 'r') as f:
@@ -99,8 +103,8 @@ class Simulation_box:
                 #print("i=",i,"-", x,y,z,vx,vy,vz)
                 pos.append([x, y, z])
                 vel.append([vx, vy, vz])
-        return L, M, np.asarray(pos).transpose(), vel
-
+        return M, L, np.asarray(pos), np.asarray(vel), description
+    
     def saveSnapshot(self, path, mode):
         with open(path, mode) as f:
             header = [
@@ -109,6 +113,17 @@ class Simulation_box:
             ]
             f.writelines(header)
             output = np.concatenate((self.positions, self.velocities), axis=1)
+            numpy.savetxt(f, output, fmt='%.4e', delimiter=' ')
+
+    @staticmethod
+    def saveSnapshotStatic(positions, velocities, M, L, description, path, mode):
+        with open(path, mode) as f:
+            header = [
+                str(M) + "\n", description + "\n",
+                str(L) +"\n"
+            ]
+            f.writelines(header)
+            output = np.concatenate((positions, velocities), axis=1)
             numpy.savetxt(f, output, fmt='%.4e', delimiter=' ')
 
     def moveToMinimumEnergy(self):

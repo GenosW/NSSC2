@@ -2,9 +2,40 @@
 # import numpy as np
 # from numpy.random import default_rng
 import jax
-from jax import grad, jit, vmap
+import jax.numpy as np
 import scipy
 import numpy
+
+
+def Vlj(r):
+    sig = 1/np.power(2, 1/6)
+    return 4*(np.power(sig/r, 12) - np.power(sig/r, 6))
+
+
+
+def Epot(pos, *args):
+    M, L = args
+    pos = pos.reshape((3,M))
+    energy = 0
+    for i in range(M-1):
+        for j in list(range(i+1,M)):
+            deltaX = pos[0,i] - pos[0,j]
+            deltaXmi = deltaX - L * np.round(deltaX/L)
+            deltaY = pos[1,i] - pos[1,j]
+            deltaYmi = deltaY - L * np.round(deltaY/L)
+            deltaZ = pos[2,i] - pos[2,j]
+            deltaZmi = deltaZ - L * np.round(deltaZ/L)
+            r = np.linalg.norm([deltaXmi, deltaYmi, deltaZmi])
+            energy += Vlj(r)
+                
+    return energy
+
+def test(val):
+    x,y,z = val
+    return x*2+y*3+z*5
+
+Forces = jax.jit(jax.grad(Epot))
+
 
 class Simulation_box:
     name = 'Simulation box'
@@ -23,7 +54,7 @@ class Simulation_box:
             self.positions =  self.generateInitialPositions(L, M) # like np.array((3,M))
             self.velocities =  self.generateInitialVelocities(M, Sigma)
         self.description = description
-        self.EpotD = grad(self.Epot)
+        #self.Forces = jit(grad(self.Epotentiell))
 
     @staticmethod
     def generateInitialPositions(L, M):
@@ -35,29 +66,33 @@ class Simulation_box:
         cov = Sigma * numpy.diag(mean, k=0)
         return numpy.random.multivariate_normal(mean,cov)
 
-    def Vlj(self, r):
-        return 4*(numpy.power(self.sig/r, 12) - numpy.power(self.sig/r, 6))
+#    def Vlj(self, r):
+#        return 4*(numpy.power(self.sig/r, 12) - numpy.power(self.sig/r, 6))
 
-    def Epot(self, pos):
-        pos = pos.reshape((3,self.M))
-        energy = 0
-        for i in range(self.M-1):
-            for j in list(range(i+1,self.M)):
-                deltaX = pos[0,i] - pos[0,j]
-                deltaXmi = deltaX - self.L * numpy.round(deltaX/self.L)
-                deltaY = pos[1,i] - pos[1,j]
-                deltaYmi = deltaY - self.L * numpy.round(deltaY/self.L)
-                deltaZ = pos[2,i] - pos[2,j]
-                deltaZmi = deltaZ - self.L * numpy.round(deltaZ/self.L)
-                r = numpy.linalg.norm([deltaXmi, deltaYmi, deltaZmi])
-                energy += self.Vlj(r)
-                
-        return energy
+#    def Epotentiell(self, pos):
+#        pos = pos.reshape((3,self.M))
+#        energy = 0
+#        for i in range(self.M-1):
+#            for j in list(range(i+1,self.M)):
+#                deltaX = pos[0,i] - pos[0,j]
+#                deltaXmi = deltaX - self.L * numpy.round(deltaX/self.L)
+#                deltaY = pos[1,i] - pos[1,j]
+#                deltaYmi = deltaY - self.L * numpy.round(deltaY/self.L)
+#                deltaZ = pos[2,i] - pos[2,j]
+#                deltaZmi = deltaZ - self.L * numpy.round(deltaZ/self.L)
+#                r = numpy.linalg.norm([deltaXmi, deltaYmi, deltaZmi])
+#                energy += self.Vlj(r)
+#                
+#        return energy
+
+    def Epotentiell(self, pos):
+        args = (self.M,  self.L)
+        return Epot(pos, *args)
 
 
     
     def moveToMinimumEnergy(self):
-        newPositions = scipy.optimize.minimize(self.Epot, self.positions.reshape(3*self.M), jac=self.EpotD, method='CG')
+        newPositions = scipy.optimize.minimize(Epot, self.positions.reshape(3*self.M), jac=Forces, args=(self.M, self.L), method='CG').x
         self.positions = newPositions.reshape(3,self.M)
 
     def Verlet(self, molecules):

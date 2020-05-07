@@ -31,7 +31,7 @@ if __name__ == "__main__":
         print(f"Name:{name}")
 
     snapshotDir = "snapshots/"
-    saveFile = snapshotDir+"asdf.xyz"
+    saveFile = snapshotDir+"asdf.txt"
 
     sim = Simulation_box(M, L, Sigma, Name=name)
     sim.saveSnapshot(saveFile, mode="a")
@@ -42,6 +42,7 @@ if __name__ == "__main__":
     sim.moveToMinimumEnergy()
     print("CG done!")
     print("#"*40)
+    print(sim.positions)
     print("Epot1:",Epot_lj(sim.positions, L, M))
     #print("Epot2:",sim.Epot_Ch(sim.positions))
     #print("Forces: ", -grad_Epot(sim.positions.ravel().reshape(M,3), L, M))

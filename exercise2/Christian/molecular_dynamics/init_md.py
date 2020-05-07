@@ -30,6 +30,6 @@ if __name__ == "__main__":
     print(f"Sigma = {Sigma}")
     sim = Simulation_box(M, L)
     print(sim.positions)
-    print(sim.Epot(sim.positions.reshape(3*M)))
+    print(sim.Epotentiell(sim.positions.reshape(3*M)))
     sim.moveToMinimumEnergy()
-    #print(sim.Epot(sim.positions.reshape(3*M)))
+    print(sim.Epotentiell(sim.positions.reshape(3*M)))
