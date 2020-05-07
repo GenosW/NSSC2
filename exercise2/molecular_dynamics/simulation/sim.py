@@ -1,30 +1,35 @@
-#!D:\Studium\Code\NSSC\NSSC2\exercise2\molecular_dynamics\md\Scripts\python.exe
 # import numpy as np
 # from numpy.random import default_rng
 import jax.numpy as np
 from jax import grad, jit
 import numpy
+import scipy
 
 
-def Epot_lj(positions):
+def Epot_lj(positions, L:float, M:int):
     """Potential energy for Lennard-Jones potential in reduced units.
         In this system of units, epsilon=1 and sigma=2**(-1. / 6.). """
-    print(positions.shape)
+    # print(positions.shape)
+    positions = positions.reshape((M,3))
     if positions.ndim != 2 or positions.shape[1] != 3:
         raise ValueError("positions must be an Mx3 array")
     # Compute all squared distances between pairs without iterating.
     delta = positions[:, np.newaxis, :] - positions
+    delta = delta - L*np.around(delta/L, decimals=0)
+    # print("delta")
+    # print(delta)
     r2 = (delta * delta).sum(axis=2)
+    # print("r2")
+    # print(r2)
     # Take only the upper triangle (combinations of two atoms).
     indices = np.triu_indices(r2.shape[0], k=1)
     rm2 = 1. / r2[indices]
     # Compute the potental energy recycling as many calculations as possible.
     rm6 = rm2 * rm2 * rm2
     rm12 = rm6 * rm6
-    return (2. * rm12 - rm6).sum()
+    return (rm12 - 2.*rm6).sum()
 
-
-grad_Epot = jit(grad(Epot_lj))
+grad_Epot = jit(grad(Epot_lj), static_argnums=(1, 2))
 
 
 def Verlet(self, x, v, f, dt):
@@ -58,8 +63,6 @@ class Simulation_box:
             self.positions = self.generateInitialPositions(
                 L, M)  # like np.array((3,M))
             self.velocities = self.generateInitialVelocities(M, Sigma)
-            print("positions:", self.positions)
-            print("velocities:", self.velocities)
         if Name:
             self.description = Name + ": " + description
         else:
@@ -96,7 +99,7 @@ class Simulation_box:
                 #print("i=",i,"-", x,y,z,vx,vy,vz)
                 pos.append([x, y, z])
                 vel.append([vx, vy, vz])
-        return L, M, pos, vel
+        return L, M, np.asarray(pos).transpose(), vel
 
     def saveSnapshot(self, path, mode):
         with open(path, mode) as f:
@@ -107,6 +110,23 @@ class Simulation_box:
             f.writelines(header)
             output = np.concatenate((self.positions, self.velocities), axis=1)
             numpy.savetxt(f, output, fmt='%.4e', delimiter=' ')
+
+    def moveToMinimumEnergy(self):
+        result = scipy.optimize.minimize(Epot_lj, self.positions.ravel(), jac=grad_Epot, method='CG', args=(self.L, self.M), options={'gtol': 5e-3})
+        newPositions = result.x
+        print("Optimizations successful: ", result.success)
+        print("Message: ", result.message)
+        self.positions = newPositions.reshape(self.M,3)
+        print("Sanity check: ", self.sanity_check(), "...should be [0, 0, 0].")
+
+    def sanity_check(self):
+        return np.around(grad_Epot(self.positions.ravel(), self.L, self.M).reshape(self.M,3).sum(axis=0), decimals=4) # (sum(fx_i), sum(fy_i), sum(fz_i))
+
+    def average_velocity(self):
+        return self.velocities.sum(axis=0)/self.M
+
+    def toCOM(self):
+        self.velocities = self.velocities - self.average_velocity()
 
 
 class Trajectory:
