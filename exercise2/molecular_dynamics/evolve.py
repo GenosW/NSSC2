@@ -10,7 +10,7 @@ import jax.numpy as np
 from jax import grad, jit
 import numpy
 from argparse import ArgumentParser
-from simulation import Simulation_box, Trajectory, Epot_lj, grad_Epot, Verlet
+from simulation import Simulation_box, Epot_lj, grad_Epot, Verlet
 
 
 # Command-line argument parser

@@ -14,6 +14,7 @@ def Epot_lj(positions, L:float, M:int):
         positions = positions.reshape((M,3))
     if positions.ndim != 2 or positions.shape[1] != 3:
         raise ValueError("positions must be an Mx3 array or a 1D array that can be reshaped to Mx3!")
+    sig = 1 / np.power(2, 1 / 6)
     # Compute all squared distances between pairs without iterating.
     delta = positions[:, np.newaxis, :] - positions
     delta = delta - L*np.around(delta/L, decimals=0)
@@ -24,7 +25,7 @@ def Epot_lj(positions, L:float, M:int):
     # print(r2)
     # Take only the upper triangle (combinations of two atoms).
     indices = np.triu_indices(r2.shape[0], k=1)
-    rm2 = 1. / r2[indices]
+    rm2 = sig / r2[indices]
     # Compute the potental energy recycling as many calculations as possible.
     rm6 = rm2 * rm2 * rm2
     rm12 = rm6 * rm6
@@ -34,20 +35,22 @@ grad_Epot = jit(grad(Epot_lj), static_argnums=(1, 2))
 
 def Verlet(x, v, dt, M, L):
     f = -grad_Epot(x.ravel(), L, M).reshape(M,3)
-    x_new = numpy.zeros((M,3))
-    v_new = numpy.zeros((M,3))
-    for i in range(M):
-        x_new[i,:] = x[i,:] + v[i,:]*dt + 0.5*f[i,:]*dt*dt
+    #x_new = np.zeros((M,3))
+    #v_new = np.zeros((M,3))
+    # for i in range(M):
+    #     x_new[i,:] = x[i,:] + v[i,:]*dt + 0.5*f[i,:]*dt*dt
+    # f_new = -grad_Epot(x_new.ravel(), L, M).reshape(M,3)
+    # for i in range(M):
+    #     v_new[i,:] = v[i,:] + (f[i,:] + f_new)*0.5*dt
+
+    x_new = x + (v + 0.5*f*dt)*dt
     f_new = -grad_Epot(x_new.ravel(), L, M).reshape(M,3)
-    for i in range(M):
-        v_new[i,:] = v[i,:] + 0.5*f[i,:]*dt + 0.5*f_new[i,:]*dt
-    
+    v_new = v + (f + f_new)*0.5*dt
     return x_new, v_new
 
 
 class Simulation_box:
     name = 'Simulation box'
-    sig = 1 / np.power(2, 1 / 6)
 
     def __init__(self,
                  M: int = 3,
@@ -81,7 +84,7 @@ class Simulation_box:
     @staticmethod
     def generateInitialVelocities(M, Sigma):
         mean = np.ones(3)
-        cov = Sigma * np.diag(mean, k=0)
+        cov = Sigma * numpy.diag(mean, k=0)
         return numpy.random.multivariate_normal(0 * mean, cov,
                                                 size=M)  #.transpose()
     @staticmethod
@@ -174,28 +177,28 @@ class Simulation_box:
         return positions - L * np.around(positions/L, decimals=0)
 
 
-class Trajectory:
-    def __init__(self, input_snap="traj_example.txt", dt=0.001, N=10):
-        self.input = input_snap
-        self.dt = 0.001
-        self.N = 10
-        SimBox.readSnapshot(input_snap)
-        self.SimBox = 1
-        self.trajectories = []
+# class Trajectory:
+#     def __init__(self, input_snap="traj_example.txt", dt=0.001, N=10):
+#         self.input = input_snap
+#         self.dt = 0.001
+#         self.N = 10
+#         SimBox.readSnapshot(input_snap)
+#         self.SimBox = 1
+#         self.trajectories = []
 
-    def timeStep(self):
-        # Do some Netwon stuff
-        # Verlet algorithm
-        return newPositions, newVelocities
+#     def timeStep(self):
+#         # Do some Netwon stuff
+#         # Verlet algorithm
+#         return newPositions, newVelocities
 
-    def iterate(self, N):
-        for n in list(range(N)):
-            newPos, newVel = self.timeStep()
-            newBox = Simulation_Box(newPos, newVel)
-            newBox.saveSnapshot()
-            self.trajectories.append(newBox)
-            # whatever else needds to be done
-        return 0  # smth
+#     def iterate(self, N):
+#         for n in list(range(N)):
+#             newPos, newVel = self.timeStep()
+#             newBox = Simulation_Box(newPos, newVel)
+#             newBox.saveSnapshot()
+#             self.trajectories.append(newBox)
+#             # whatever else needds to be done
+#         return 0  # smth
 
 
 '''

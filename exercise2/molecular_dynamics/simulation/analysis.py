@@ -22,11 +22,10 @@ class Simulation_Analyzer:
         print(f"Epot = {Epot}")
         print(f"Ekin = {Ekin}")
 
-    def analyze(self, path=None, start=0., stop=100):
+    def analyze(self, path=None, num_samples=50, start=0., stop=100):
         if not path:
             path = self.path
             
-        num_samples = 50
         V = self.sim.L * self.sim.L * self.sim.L
         lines_per_snap = self.sim.M + 3
         lines_in_file = self.sim.getNumLines(path)
@@ -59,13 +58,13 @@ class Simulation_Analyzer:
                     print(k_tmp)
                     k_tmp = 49
                     #k_tmp = 1 - self.sim.L/2
-
-                pcf[int(k_tmp)] 
+                else:
+                    pcf[int(k_tmp)] += 1
             i += 1
             offset = i*lines_per_snap
-            if offset >= stop**num_snaps*lines_per_snap:
+            if offset >= stop*num_snaps*lines_per_snap:
                 break
-
+        print(i)
         # normalize 
-        pcf *= V/num_samples
+        pcf *= V/(num_samples*num_samples)
         return samples, pcf

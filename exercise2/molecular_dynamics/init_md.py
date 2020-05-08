@@ -7,7 +7,7 @@ Takes 3 command line arguments (callable as above):
     Sigma... a standard deviation for the velocity distribution
 '''
 from argparse import ArgumentParser
-from simulation import Simulation_box, Trajectory, Epot_lj, grad_Epot
+from simulation import Simulation_box, Epot_lj, grad_Epot
 
 # Command-line argument parser
 parser = ArgumentParser(description='generates a ”relaxed” (i.e., low-energy) starting confguration for a molecular dynamics simulation.')
