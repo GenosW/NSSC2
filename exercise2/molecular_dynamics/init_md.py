@@ -31,10 +31,10 @@ if __name__ == "__main__":
         print(f"Name:{name}")
 
     snapshotDir = "snapshots/"
-    saveFile = snapshotDir+"asdf.txt"
+    saveFile = snapshotDir+"init.xyz"
 
     sim = Simulation_box(M, L, Sigma, Name=name)
-    sim.saveSnapshot(saveFile, mode="a")
+    #sim.saveSnapshot(saveFile, mode="a")
     print("Epot1:",Epot_lj(sim.positions, L, M))
     #print("Epot2:",sim.Epot_Ch(sim.positions))
     print("#"*40)
@@ -42,12 +42,14 @@ if __name__ == "__main__":
     sim.moveToMinimumEnergy()
     print("CG done!")
     print("#"*40)
-    print(sim.positions)
+    print("sim.positions.shape =", sim.positions.shape)
     print("Epot1:",Epot_lj(sim.positions, L, M))
     #print("Epot2:",sim.Epot_Ch(sim.positions))
     #print("Forces: ", -grad_Epot(sim.positions.ravel().reshape(M,3), L, M))
-    print("Average: ", sim.average_velocity())
+    print("Average velocity: ", sim.average_velocity())
     print("centering: ")
     sim.toCOM()
-    print("Average: ", sim.average_velocity())
-    sim.saveSnapshot(saveFile, mode="a")
+    sim.positions = sim.enforceMI(sim.positions, sim.L)
+    print("Average velocity now: ", sim.average_velocity())
+    print("Epot1:",Epot_lj(sim.positions, L, M))
+    sim.saveSnapshot(saveFile, mode="w")

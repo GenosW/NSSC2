@@ -28,8 +28,13 @@ if __name__ == "__main__":
     N = args.N
     name = args.name
 
+    outfile = "snapshots/trajectory.xyz"
+
     M, L, positions, velocities, description = Simulation_box.loadSnapshot(inputPath)
-    Simulation_box.saveSnapshotStatic(positions, velocities, M, L, description, 'trajectory.txt', mode='a')
+    Simulation_box.saveSnapshotStatic(positions, velocities, M, L, description, outfile, mode='w') # overwrite file
     for i in range(N-1):
         positions, velocities = Verlet(positions, velocities, dt, M, L)
-        Simulation_box.saveSnapshotStatic(positions, velocities, M, L, description, 'trajectory.txt', mode='a')
+        if i%10 == 0:
+            print(f"Step {i} done")
+            #positions = Simulation_box.enforceMI(positions, L)
+        Simulation_box.saveSnapshotStatic(positions, velocities, M, L, description, outfile, mode='a')

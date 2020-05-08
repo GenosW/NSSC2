@@ -10,9 +10,10 @@ def Epot_lj(positions, L:float, M:int):
     """Potential energy for Lennard-Jones potential in reduced units.
         In this system of units, epsilon=1 and sigma=2**(-1. / 6.). """
     # print(positions.shape)
-    positions = positions.reshape((M,3))
+    if positions.ndim == 1 and positions.size == M*3:
+        positions = positions.reshape((M,3))
     if positions.ndim != 2 or positions.shape[1] != 3:
-        raise ValueError("positions must be an Mx3 array")
+        raise ValueError("positions must be an Mx3 array or a 1D array that can be reshaped to Mx3!")
     # Compute all squared distances between pairs without iterating.
     delta = positions[:, np.newaxis, :] - positions
     delta = delta - L*np.around(delta/L, decimals=0)
@@ -56,21 +57,22 @@ class Simulation_box:
                  path: str = '',
                  Name=""):
         if path:
-            Lsnap, Msnap, positions, velocities = self.loadSnapshot(path)
-            self.M = Msnap
-            self.L = Lsnap
-            self.positions = positions  # like np.array((M,3))
-            self.velocities = velocities
+            self.M, self.L, self.positions, self.velocities, descSnap = self.loadSnapshot(path)
+            if Name:
+                self.description = Name + ": " + descSnap
+            else:
+                self.description = descSnap
         else:
             self.M = M
             self.L = L
             self.positions = self.generateInitialPositions(
                 L, M)  # like np.array((3,M))
             self.velocities = self.generateInitialVelocities(M, Sigma)
-        if Name:
-            self.description = Name + ": " + description
-        else:
-            self.description = description
+            if Name:
+                self.description = Name + ": " + description
+            else:
+                self.description = description
+        self.description.strip("\n")
 
     @staticmethod
     def generateInitialPositions(L, M):
@@ -83,20 +85,26 @@ class Simulation_box:
         return numpy.random.multivariate_normal(0 * mean, cov,
                                                 size=M)  #.transpose()
     @staticmethod
-    def loadSnapshot(path, M=None):
+    def loadSnapshot(path, offset=0):
         pos = []
         vel = []
         with open(path, 'r') as f:
+            for _ in range(offset):
+                line = f.readline()
+                if not line:
+                    return False
             row = f.readline().split()
-            if len(row) == 1 and not M:
-                print("Header detected")
-                M = int(row[0])
-                description = f.readline()
-                L = float(f.readline().split()[0])
-                print("M: ", M)
-                print("desc: ", description)
-                print("L: ", L)
-            for _ in list(range(M)):
+            if not row:
+                return False
+            #print("Header detected")
+            #print(row)
+            M = int(row[0])
+            description = f.readline().strip("\n")
+            L = float(f.readline().split()[0])
+            # print("M: ", M)
+            # print("desc: ", description)
+            # print("L: ", L)
+            for _ in range(M):
                 row = f.readline().split()
                 row = [float(z) for z in row]
                 (x, y, z, vx, vy, vz) = row
@@ -104,6 +112,21 @@ class Simulation_box:
                 pos.append([x, y, z])
                 vel.append([vx, vy, vz])
         return M, L, np.asarray(pos), np.asarray(vel), description
+
+    def loadSnapshotIntoBox(self, path, offset=0):
+        ret = self.loadSnapshot(path, offset=offset)
+        if not ret:
+            return False
+        (self.M, self.L, self.positions, self.velocities, self.description) = ret
+        return True
+
+
+    @staticmethod
+    def getNumLines(path):
+        with open(path, 'r') as file:
+            num_lines = sum(1 for line in file)
+            #num_lines = sum(1 for line in file if line.rstrip()) # alternative: strip empty lines
+        return num_lines
     
     def saveSnapshot(self, path, mode):
         with open(path, mode) as f:
@@ -120,7 +143,7 @@ class Simulation_box:
         with open(path, mode) as f:
             header = [
                 str(M) + "\n", description + "\n",
-                str(L) +"\n"
+                str(L) + "\n"
             ]
             f.writelines(header)
             output = np.concatenate((positions, velocities), axis=1)
@@ -140,8 +163,15 @@ class Simulation_box:
     def average_velocity(self):
         return self.velocities.sum(axis=0)/self.M
 
+    def Ekin(self):
+        return 0.5*np.power(self.velocities, 2).sum(axis=0)
+
     def toCOM(self):
         self.velocities = self.velocities - self.average_velocity()
+
+    @staticmethod
+    def enforceMI(positions, L):
+        return positions - L * np.around(positions/L, decimals=0)
 
 
 class Trajectory:
@@ -166,37 +196,6 @@ class Trajectory:
             self.trajectories.append(newBox)
             # whatever else needds to be done
         return 0  # smth
-
-
-class TrajectoryOld:  # Orts- + Bewegungsdaten von einem Teilchen
-    def __init__(self, x=0, y=0, z=0, vx=0, vy=0, vz=0):
-        self.x = x
-        self.y = y
-        self.z = z
-        self.vx = vx
-        self.vy = vy
-        self.vz = vz
-
-    def getPos(self):
-        return np.asarray([self.x, self.y, self.z], dtype=float)
-
-    def getDist(self,
-                pos):  # pos should be either list or np.array like [x, y, z]
-        myPos = np.asarray([self.x, self.y, self.z], dtype=float)
-        dist = np.linarlg.norm(myPos - pos)
-        return dist
-
-    def getVel(self):
-        return np.asarray([self.x, self.y, self.z], dtype=float)
-
-    def getAbsVel(self):
-        v = np.linarlg.norm((self.getVel()))
-        return v
-
-    def __repr__(
-        self
-    ):  # print(TrajectoryInstance) --> {'pos': Position as np.array, 'vel': Velocity as np.array}
-        return str({'pos': self.getPos(), 'vel': self.getVel()})
 
 
 '''
