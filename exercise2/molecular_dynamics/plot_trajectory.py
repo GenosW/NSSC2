@@ -14,7 +14,7 @@ M = analyzer.sim.M
 num_snaps = 1000
 num_snaps_analyzed = int(0.75*1000)
 norm_factor = V/(4*numpy.pi*M*M)
-print((L, M, V, num_snaps_analyzed))
+print((M, L, V, num_snaps_analyzed))
 
 # Normalize
 #print(y)

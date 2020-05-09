@@ -27,8 +27,8 @@ if __name__ == "__main__":
     print("L/2*sqrt(3)=", analysis.sim.L/2*np.sqrt(3))
     print("Rest:", rest)
     # print(y)
-    analysis.savePCF(x, y, "snapshots/pcf.txt")
-    analysis.saveEnergies("snapshots/energies.txt")
+    analysis.savePCF(x, y, path="snapshots/pcf.txt")
+    analysis.saveEnergies(path="snapshots/energies.txt")
 
     # Plot the result
     # fig = plt.figure()#figsize=(12.8,9.6), dpi=200,)
