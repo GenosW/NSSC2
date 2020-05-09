@@ -28,7 +28,7 @@ if __name__ == "__main__":
     print("Rest:", rest)
     # print(y)
     analysis.savePCF(x, y, path="snapshots/pcf.txt")
-    analysis.saveEnergies(path="snapshots/energies0,0001.txt")
+    analysis.saveEnergies(path="snapshots/energies0,03.txt")
 
     # Plot the result
     # fig = plt.figure()#figsize=(12.8,9.6), dpi=200,)
