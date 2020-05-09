@@ -50,10 +50,21 @@ class Simulation_Analyzer:
         samples, dr = np.linspace(0, self.sim.L/2*np.sqrt(3), num=num_samples, retstep=True) 
         pcf = numpy.zeros_like(samples)
 
-        start_offset = int(start*num_snaps*lines_per_snap)
+        start_offset = int(start*num_snaps*lines_per_snap) # end of first 25%
+        stop_offset = stop*num_snaps*lines_per_snap # Sample number to stop at 
+        offset = 0
+        j = 0
+        # For the first 25%, we only calculate energies
+        while self.sim.loadSnapshotIntoBox(path, offset=offset):
+            self.calculateEnergies()
+            j += 1
+            offset = j*lines_per_snap
+            if offset >= start_offset: 
+                break
         offset = start_offset
-        print("offset:",offset)
         i = 0
+        print("offset:",offset)
+        # For the remaining 75%, we calculate energies + the pair density function (not normalized yet)
         while self.sim.loadSnapshotIntoBox(path, offset=offset):
             self.calculateEnergies()
             delta = self.sim.positions[:, np.newaxis, :] - self.sim.positions
@@ -71,9 +82,9 @@ class Simulation_Analyzer:
             # pcf[bins[indices]] += 1
             i += 1
             offset = start_offset + i*lines_per_snap
-            if offset >= stop*num_snaps*lines_per_snap:
+            if offset >= stop_offset:
                 break
-        print(i)
+        print("Snaps for used for PCF:",i)
         # normalize 
         #pcf *= V/(num_samples*num_samples)
         return samples, pcf, (i, self.sim.M, self.sim.L)

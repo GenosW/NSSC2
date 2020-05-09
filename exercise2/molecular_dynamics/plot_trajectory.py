@@ -24,7 +24,7 @@ V = 1/6*numpy.pi*L*L*L
 M = analyzer.sim.M
 #num_snaps = 1000
 #num_snaps_analyzed = int(0.75*1000)
-norm_factor = V/(4*numpy.pi*M*M)
+norm_factor = V/(4*numpy.pi*M*(M-1))
 print((M, L, V, num_snaps_analyzed))
 rho_avg = M/(L*L*L)
 print("rho_avg=", rho_avg)
