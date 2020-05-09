@@ -59,7 +59,8 @@ class Simulation_Analyzer:
             delta = self.sim.positions[:, np.newaxis, :] - self.sim.positions
             delta = delta - self.sim.L*np.around(delta/self.sim.L, decimals=0)
 
-            bins = numpy.trunc( numpy.sqrt((delta*delta).sum(axis=2)) /dr ).astype(int) # round to nearest int
+            bins = numpy.trunc( numpy.sqrt((delta*delta).sum(axis=2)) /dr )
+            bins = bins.astype(int) # round to nearest int
             indices = numpy.triu_indices(bins.shape[0], k=1) # only want upper triangle --> no double counting
             for k in bins[indices]:
                 if k >= num_samples:
