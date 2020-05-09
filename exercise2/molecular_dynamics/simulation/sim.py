@@ -167,7 +167,7 @@ class Simulation_box:
         return self.velocities.sum(axis=0)/self.M
 
     def Ekin(self):
-        return 0.5*np.power(self.velocities, 2).sum(axis=0)
+        return 0.5*np.power(self.velocities, 2).sum()
 
     def toCOM(self):
         self.velocities = self.velocities - self.average_velocity()
