@@ -28,7 +28,7 @@ if __name__ == "__main__":
     N = args.N
     name = args.name
 
-    outfile = "snapshots/trajectory.xyz"
+    outfile = "snapshots/trajectory_dt0,01.xyz"
 
     M, L, positions, velocities, description = Simulation_box.loadSnapshot(inputPath)
     Simulation_box.saveSnapshotStatic(positions, velocities, M, L, description, outfile, mode='w') # overwrite file

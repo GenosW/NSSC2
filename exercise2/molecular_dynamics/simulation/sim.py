@@ -14,7 +14,8 @@ def Epot_lj(positions, L:float, M:int):
         positions = positions.reshape((M,3))
     if positions.ndim != 2 or positions.shape[1] != 3:
         raise ValueError("positions must be an Mx3 array or a 1D array that can be reshaped to Mx3!")
-    sig = 1 / np.power(2, 1 / 6)
+    #sig = 1 / np.power(2, 1 / 6)
+    sig = 1.
     # Compute all squared distances between pairs without iterating.
     delta = positions[:, np.newaxis, :] - positions
     delta = delta - L*np.around(delta/L, decimals=0)
@@ -25,7 +26,7 @@ def Epot_lj(positions, L:float, M:int):
     # print(r2)
     # Take only the upper triangle (combinations of two atoms).
     indices = np.triu_indices(r2.shape[0], k=1)
-    rm2 = sig / r2[indices]
+    rm2 = 1. / r2[indices]
     # Compute the potental energy recycling as many calculations as possible.
     rm6 = rm2 * rm2 * rm2
     rm12 = rm6 * rm6

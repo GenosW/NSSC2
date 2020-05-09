@@ -50,7 +50,8 @@ class Simulation_Analyzer:
         samples, dr = np.linspace(0, self.sim.L/2*np.sqrt(3), num=num_samples, retstep=True) 
         pcf = numpy.zeros_like(samples)
 
-        offset = int(start*num_snaps*lines_per_snap)
+        start_offset = int(start*num_snaps*lines_per_snap)
+        offset = start_offset
         print("offset:",offset)
         i = 0
         while self.sim.loadSnapshotIntoBox(path, offset=offset):
@@ -60,15 +61,15 @@ class Simulation_Analyzer:
 
             bins = numpy.trunc( numpy.sqrt((delta*delta).sum(axis=2)) /dr ).astype(int) # round to nearest int
             indices = numpy.triu_indices(bins.shape[0], k=1) # only want upper triangle --> no double counting
-            # for k in bins[indices]:
-            #     if k >= num_samples:
-            #         print(k)
-            #         #k_tmp = 1 - self.sim.L/2
-            #     else:
-            #         pcf[k] += 1
-            pcf[bins[indices]] += 1
+            for k in bins[indices]:
+                if k >= num_samples:
+                    print(k)
+                    #k_tmp = 1 - self.sim.L/2
+                else:
+                    pcf[k] += 1
+            # pcf[bins[indices]] += 1
             i += 1
-            offset = i*lines_per_snap
+            offset = start_offset + i*lines_per_snap
             if offset >= stop*num_snaps*lines_per_snap:
                 break
         print(i)
