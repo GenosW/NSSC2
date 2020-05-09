@@ -1,4 +1,4 @@
-'''analyze_trajectory.py [trajectory.xyz]
+'''analyze_init.py [trajectory.xyz]
 
 analyzes a trajectory file in .xyz-format. The path of the file is given as command line argument.
 '''

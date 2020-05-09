@@ -20,7 +20,7 @@ if __name__ == "__main__":
     inputPath = args.path
 
     analysis = Simulation_Analyzer(inputPath)
-    x, y, rest = analysis.analyze(num_samples=100, start=0.25, stop=1)
+    x, y, rest = analysis.analyze(num_samples=100, start=0, stop=1)
     print("M=", analysis.sim.M)
     print("L=", analysis.sim.L)
     print("L/2=", analysis.sim.L/2)
@@ -28,7 +28,7 @@ if __name__ == "__main__":
     print("Rest:", rest)
     # print(y)
     analysis.savePCF(x, y, path="snapshots/pcf.txt")
-    analysis.saveEnergies(path="snapshots/energies.txt")
+    analysis.saveEnergies(path="snapshots/energies0,03.txt")
 
     # Plot the result
     # fig = plt.figure()#figsize=(12.8,9.6), dpi=200,)

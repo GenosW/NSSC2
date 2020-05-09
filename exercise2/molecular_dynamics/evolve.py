@@ -1,10 +1,10 @@
-'''init_md.py [M] [L] [Sigma]
-generates a ”relaxed” (i.e., low-energy) starting confguration for a molecular dynamics simulation.
+'''evolve.py [path] [dt] [N]
+takes an input initial situation and evolves from there using velocity Verlet algorithm
 
 Takes 3 command line arguments (callable as above):
-    M... a number of particles;
-    L... a side length for the simulation box; and
-    Sigma... a standard deviation for the velocity distribution
+    path... path to input file
+    dt... length of timestep
+    N... number of time steps
 '''
 import jax.numpy as np
 from jax import grad, jit
@@ -28,7 +28,7 @@ if __name__ == "__main__":
     N = args.N
     name = args.name
 
-    outfile = "snapshots/trajectory_dt0,01.xyz"
+    outfile = "snapshots/trajectory_dt0,03.xyz"
 
     M, L, positions, velocities, description = Simulation_box.loadSnapshot(inputPath)
     Simulation_box.saveSnapshotStatic(positions, velocities, M, L, description, outfile, mode='w') # overwrite file
