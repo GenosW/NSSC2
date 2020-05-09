@@ -5,8 +5,8 @@ import matplotlib.pyplot as plt
 from argparse import ArgumentParser
 from simulation import Simulation_box, Simulation_Analyzer, Epot_lj, grad_Epot, Verlet
 
-analyzer = Simulation_Analyzer("snapshots/trajectory.xyz")
-Epots, Ekins, Etots = analyzer.loadEnergies("snapshots/energies.txt")
+analyzer = Simulation_Analyzer("snapshots/trajectory_dt0,0001.xyz")
+Epots, Ekins, Etots = analyzer.loadEnergies("snapshots/energies0,0001.txt")
 
 L = analyzer.sim.L
 V = L*L*L
@@ -25,8 +25,8 @@ fig = plt.figure()#figsize=(12.8,9.6), dpi=200,)
 plt.plot(range(Epots.size), Epots, 'r-x', label="Epot")
 plt.plot(range(Ekins.size), Ekins, 'b-x', label="Ekin")
 plt.plot(range(Etots.size), Etots, 'g-x', label="Etot")
-plt.title("Volumetric density")
-plt.xlabel("r... distance to particle in origin")
-plt.ylabel("Volumetric density")
+plt.title("Energies dt = 0.0001")
+plt.xlabel("iterations")
+plt.ylabel("Energy")
 plt.legend()
-plt.savefig("snapshots/energies.png")
+plt.savefig("snapshots/energies0,0001.png")
