@@ -44,7 +44,8 @@ class Simulation_Analyzer:
             raise TypeError("There is something wrong with the input file...cannot analyze!")
 
         # <num_samples> samples evenly spaced on the intervall [0, L/2]
-        samples, dr = np.linspace(0, self.sim.L/2, num=num_samples, retstep=True) 
+        # There can still be particles outside of this sphere with raidus r=L/2!
+        samples, dr = np.linspace(0, self.sim.L/2*numpy.sqrt(3), num=num_samples, retstep=True) 
         pcf = numpy.zeros_like(samples)
 
         start_offset = int(start*num_snaps*lines_per_snap) # end of first 25% of frames
@@ -64,19 +65,29 @@ class Simulation_Analyzer:
         # For the remaining 75%, we calculate energies + the pair density function (not normalized yet)
         while self.sim.loadSnapshotIntoBox(path, offset=offset):
             self.calculateEnergies()
+
+            # PCF for current snap
+            #pcf_snap = numpy.zeros_like(samples)
             delta = self.sim.positions[:, np.newaxis, :] - self.sim.positions
             delta = delta - self.sim.L*np.around(delta/self.sim.L, decimals=0)
 
             bins = numpy.trunc( numpy.sqrt((delta*delta).sum(axis=2)) /dr )
-            bins = bins.astype(int) # round to nearest int
-            indices = numpy.triu_indices(bins.shape[0], k=1) # only want upper triangle --> no double counting
+            bins = bins.astype(int) # save array as array of ints
+            indices = numpy.triu_indices(bins.shape[0], k=1) # only want upper triangle --> no double counting of distances
             for k in bins[indices]:
+                # There can still be particles outside of this sphere with raidus r=L/2!
                 if k >= num_samples:
-                    print(k)
+                    pass
+                    #print(k)
                     #k_tmp = 1 - self.sim.L/2
                 else:
                     pcf[k] += 1
-            # pcf[bins[indices]] += 1
+            # Normalize pcf_snap to integral(pcf_snap)=1
+            #pcf_snap = pcf_snap / pcf_snap.sum()
+            # and add to PCF for trajectory
+            #pcf = pcf + pcf_snap
+
+            # Offset (in file) for next snapshot
             i += 1
             offset = start_offset + i*lines_per_snap
             if offset >= stop_offset:
@@ -89,7 +100,7 @@ class Simulation_Analyzer:
     def savePCF(self, r, pcf, path):
         out = numpy.stack((r, pcf), axis=1)
         with open(path, 'w') as f:
-            numpy.savetxt(f, out, fmt='%.4e', delimiter=' ')
+            numpy.savetxt(f, out, fmt='%e', delimiter=' ')
 
     def loadPCF(self, path):
         with open(path, 'r') as f:
@@ -101,7 +112,7 @@ class Simulation_Analyzer:
     def saveEnergies(self, path):
         out = numpy.stack((np.array(self.Epots), np.array(self.Ekins), np.array(self.Etots)), axis=1)
         with open(path, 'w') as f:
-            numpy.savetxt(f, out, fmt='%.4e', delimiter=' ')
+            numpy.savetxt(f, out, fmt='%e', delimiter=' ')
 
     def loadEnergies(self, path):
         with open(path, 'r') as f:

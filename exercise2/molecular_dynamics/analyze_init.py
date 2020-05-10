@@ -9,10 +9,15 @@ import matplotlib.pyplot as plt
 from argparse import ArgumentParser
 from simulation import Simulation_box, Simulation_Analyzer, Epot_lj, grad_Epot, Verlet
 
-
 # Command-line argument parser
-parser = ArgumentParser(description='eanalyzes a trajectory file in .xyz-format. The path of the file is given as command line argument.')
-parser.add_argument('path', metavar='trajectory.xyz',type=str, help='a path to a trajectory file (.xyz);')
+parser = ArgumentParser(
+    description=
+    'eanalyzes a trajectory file in .xyz-format. The path of the file is given as command line argument.'
+)
+parser.add_argument('path',
+                    metavar='trajectory.xyz',
+                    type=str,
+                    help='a path to a trajectory file (.xyz);')
 
 if __name__ == "__main__":
     args = parser.parse_args()
@@ -23,8 +28,8 @@ if __name__ == "__main__":
     x, y, rest = analysis.analyze(num_samples=100, start=0, stop=1)
     print("M=", analysis.sim.M)
     print("L=", analysis.sim.L)
-    print("L/2=", analysis.sim.L/2)
-    print("L/2*sqrt(3)=", analysis.sim.L/2*np.sqrt(3))
+    print("L/2=", analysis.sim.L / 2)
+    print("L/2*sqrt(3)=", analysis.sim.L / 2 * np.sqrt(3))
     print("Rest:", rest)
     # print(y)
     analysis.savePCF(x, y, "snapshots/pcf_init.txt")

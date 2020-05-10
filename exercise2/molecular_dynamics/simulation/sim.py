@@ -140,7 +140,7 @@ class Simulation_box:
             ]
             f.writelines(header)
             output = np.concatenate((self.positions, self.velocities), axis=1)
-            numpy.savetxt(f, output, fmt='%.4e', delimiter=' ')
+            numpy.savetxt(f, output, fmt='%e', delimiter=' ')
 
     @staticmethod
     def saveSnapshotStatic(positions, velocities, M, L, description, path, mode):
@@ -151,7 +151,7 @@ class Simulation_box:
             ]
             f.writelines(header)
             output = np.concatenate((positions, velocities), axis=1)
-            numpy.savetxt(f, output, fmt='%.4e', delimiter=' ')
+            numpy.savetxt(f, output, fmt='%e', delimiter=' ')
 
     def moveToMinimumEnergy(self):
         result = scipy.optimize.minimize(Epot_lj, self.positions.ravel(), jac=grad_Epot, method='CG', args=(self.L, self.M), options={'gtol': 1e-3*self.M})

@@ -10,11 +10,26 @@ from argparse import ArgumentParser
 from simulation import Simulation_box, Epot_lj, grad_Epot
 
 # Command-line argument parser
-parser = ArgumentParser(description='generates a ”relaxed” (i.e., low-energy) starting confguration for a molecular dynamics simulation.')
-parser.add_argument('M', metavar='M',type=int, help='a number of particles;')
-parser.add_argument('L', metavar='L',type=float, help='a side length for the simulation box;')
-parser.add_argument('Sigma', metavar='Sigma',type=float, help='a standard deviation for the velocity distribution')
-parser.add_argument('-name', metavar='name', type=str, help='Name/ID of simulation that is, if given, prepended to the description.', default="")
+parser = ArgumentParser(
+    description=
+    'generates a ”relaxed” (i.e., low-energy) starting confguration for a molecular dynamics simulation.'
+)
+parser.add_argument('M', metavar='M', type=int, help='a number of particles;')
+parser.add_argument('L',
+                    metavar='L',
+                    type=float,
+                    help='a side length for the simulation box;')
+parser.add_argument('Sigma',
+                    metavar='Sigma',
+                    type=float,
+                    help='a standard deviation for the velocity distribution')
+parser.add_argument(
+    '-name',
+    metavar='name',
+    type=str,
+    help=
+    'Name/ID of simulation that is, if given, prepended to the description.',
+    default="")
 
 if __name__ == "__main__":
     args = parser.parse_args()
@@ -31,25 +46,25 @@ if __name__ == "__main__":
         print(f"Name:{name}")
 
     snapshotDir = "snapshots/"
-    saveFile = snapshotDir+"init.xyz"
+    saveFile = snapshotDir + "init.xyz"
 
     sim = Simulation_box(M, L, Sigma, Name=name)
     #sim.saveSnapshot(saveFile, mode="a")
-    print("Epot1:",Epot_lj(sim.positions, L, M))
+    print("Epot1:", Epot_lj(sim.positions, L, M))
     #print("Epot2:",sim.Epot_Ch(sim.positions))
-    print("#"*40)
+    print("#" * 40)
     print("Minimizing...")
     sim.moveToMinimumEnergy()
     print("CG done!")
-    print("#"*40)
+    print("#" * 40)
     print("sim.positions.shape =", sim.positions.shape)
-    print("Epot1:",Epot_lj(sim.positions, L, M))
+    print("Epot1:", Epot_lj(sim.positions, L, M))
     #print("Epot2:",sim.Epot_Ch(sim.positions))
     #print("Forces: ", -grad_Epot(sim.positions.ravel().reshape(M,3), L, M))
-    print("Average velocity: ", sim.average_velocity(sim.velocities))
+    print("Average velocity: ", sim.average_velocity())
     print("centering: ")
     sim.toCOM()
-    sim.positions = sim.enforceMI(sim.positions, sim.L)
-    print("Average velocity now: ", sim.average_velocity(sim.velocities))
-    print("Epot1:",Epot_lj(sim.positions, L, M))
+    sim.positions = sim.enforceMI()
+    print("Average velocity now: ", sim.average_velocity())
+    print("Epot1:", Epot_lj(sim.positions, L, M))
     sim.saveSnapshot(saveFile, mode="w")
