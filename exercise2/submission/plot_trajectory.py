@@ -1,3 +1,5 @@
+
+#!/usr/bin/env python
 import jax.numpy as np
 from jax import grad, jit
 import numpy

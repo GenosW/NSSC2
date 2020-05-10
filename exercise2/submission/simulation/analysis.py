@@ -125,5 +125,5 @@ class Simulation_Analyzer:
     def loadEnergies(self, path):
         with open(path, 'r') as f:
             in_arr = numpy.loadtxt(f)
-            assert (in_arr.shape[1] == 3)
-            return in_arr[:, 0], in_arr[:, 1], in_arr[:, 2]
+            assert (in_arr.shape[1] == 2)
+            return in_arr[:, 0], in_arr[:, 1]

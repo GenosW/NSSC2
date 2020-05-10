@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 import jax.numpy as np
 from jax import grad, jit
 import numpy
@@ -5,8 +6,8 @@ import matplotlib.pyplot as plt
 from argparse import ArgumentParser
 from simulation import Simulation_box, Simulation_Analyzer, Epot_lj, grad_Epot, Verlet
 
-parser = ArgumentParser(description='plots a pcf.txt file')
-parser.add_argument('path', metavar='energies.txt',type=str, help='a path to a pcf file;', default="snapshots/energies.txt")
+parser = ArgumentParser(description='plots a energies.txt file')
+parser.add_argument('path', metavar='energies.txt',type=str, help='a path to a energy file;', default="snapshots/energies.txt")
 
 # Parse arguments
 args = parser.parse_args()
@@ -14,14 +15,14 @@ print(args)
 path = args.path
 
 energies_file = path
-snap_file = path.replace("energies", "trajectory") #"snapshots/trajectory_dt0,01_p.xyz"
+snap_file = path.replace("energies", "trajectory").replace("txt", "xyz") #"snapshots/trajectory_dt0,01_p.xyz"
 try:
     dt_str = energies_file.split("_")[1].strip("dt")
 except:
     dt_str = "???"
 analyzer = Simulation_Analyzer(snap_file)
-Epots, Ekins, Etots = analyzer.loadEnergies(energies_file)
-
+Epots, Ekins = analyzer.loadEnergies(energies_file)
+Etots = Epots + Ekins
 L = analyzer.sim.L
 V = L*L*L
 M = analyzer.sim.M
@@ -40,6 +41,6 @@ plt.title("Energies dt = "+dt_str)
 plt.xlabel("iterations")
 plt.ylabel("Energy")
 plt.legend()
-figpath = path.replace("xyz", "png") #"snapshots/vol_dens_dt0,03p.png"
+figpath = path.replace("txt", "png") #"snapshots/vol_dens_dt0,03p.png"
 plt.savefig(figpath)
 print(f"Saved plot in <{figpath}")

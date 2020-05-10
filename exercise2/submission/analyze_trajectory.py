@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 '''analyze_trajectory.py [trajectory.xyz]
 
 analyzes a trajectory file in .xyz-format. The path of the file is given as command line argument.
