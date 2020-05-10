@@ -49,7 +49,7 @@ if __name__ == "__main__":
 
     snapshotDir = "snapshots/"
     saveFile = snapshotDir + "init.xyz"
-    print("Initial configuration will be saved at:", saveFile)
+    print("Initial configuration will be saved at:" snapshots/init.xyz")
     print("If the directory ./snapshots/ does not exist, it will be created...")
     DirExists = isdir("./snapshots") 
     if not DirExists:
