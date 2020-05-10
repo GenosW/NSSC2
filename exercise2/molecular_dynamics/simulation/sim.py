@@ -3,36 +3,41 @@
 import jax.numpy as np
 from jax import grad, jit
 import numpy
-import scipy
+from scipy.optimize import minimize
 
 
-def Epot_lj(positions, L:float, M:int):
+def Epot_lj(positions, L: float, M: int):
     """Potential energy for Lennard-Jones potential in reduced units.
         In this system of units, epsilon=1 and sigma=2**(-1. / 6.). 
         
         The function accepts numpy arrays of shape (M, 3) [2D] or (M*3) [1D]."""
-    if positions.ndim != 2 or positions.shape[1] != 3 and not( positions.ndim == 1 and positions.size == M*3):
-        raise ValueError("positions must be an Mx3 array or a 1D array that can be reshaped to Mx3!")
-    if positions.ndim == 1 and positions.size == M*3:
-        positions = positions.reshape((M,3)) # Reshape to Mx3
+    if positions.ndim != 2 or positions.shape[1] != 3 and not (
+            positions.ndim == 1 and positions.size == M * 3):
+        raise ValueError(
+            "positions must be an Mx3 array or a 1D array that can be reshaped to Mx3!"
+        )
+    if positions.ndim == 1 and positions.size == M * 3:
+        positions = positions.reshape((M, 3))  # Reshape to Mx3
     #sig = 1 / np.power(2, 1 / 6)
     sig = 1.
 
     # Compute all squared distances between pairs
     delta = positions[:, np.newaxis, :] - positions
-    delta = delta - L*np.around(delta/L, decimals=0)
-    r2 = (delta * delta).sum(axis=2) # r^2 ...squared distances
+    delta = delta - L * np.around(delta / L, decimals=0)
+    r2 = (delta * delta).sum(axis=2)  # r^2 ...squared distances
 
     # Take only the upper triangle (combinations of two atoms).
     indices = np.triu_indices(r2.shape[0], k=1)
-    rm2 = sig*sig / r2[indices] # (sig/r)^2
+    rm2 = sig * sig / r2[indices]  # (sig/r)^2
     # Compute the potental energy recycling as many calculations as possible.
-    rm6 = rm2 * rm2 * rm2 # (sig/r)^6
-    rm12 = rm6 * rm6 # (sig/r)^12
-    return (rm12 - 2.*rm6).sum()
+    rm6 = rm2 * rm2 * rm2  # (sig/r)^6
+    rm12 = rm6 * rm6  # (sig/r)^12
+    return (rm12 - 2. * rm6).sum()
+
 
 # Define the gradient of Epot via jax automated differentiation and jit
 grad_Epot = jit(grad(Epot_lj), static_argnums=(1, 2))
+
 
 def Verlet(x, v, dt, M, L):
     """Integration of Newton's equations of motion via the Verlet algorithm.
@@ -40,14 +45,14 @@ def Verlet(x, v, dt, M, L):
         This implementation needs only a function to be defined for the gradient of Epot: grad_Epot
     """
     # Calculate forces for current iteration step
-    f = -grad_Epot(x.ravel(), L, M).reshape(M,3)
+    f = -grad_Epot(x.ravel(), L, M).reshape(M, 3)
 
     # Calculate new positions
-    x_new = x + (v + 0.5*f*dt)*dt
+    x_new = x + (v + 0.5 * f * dt) * dt
     # Calculate new forces based on the new positions
-    f_new = -grad_Epot(x_new.ravel(), L, M).reshape(M,3)
+    f_new = -grad_Epot(x_new.ravel(), L, M).reshape(M, 3)
     # Calculate new velocities based on average of old and new forces
-    v_new = v + (f + f_new)*0.5*dt
+    v_new = v + (f + f_new) * 0.5 * dt
     return x_new, v_new
 
 
@@ -71,7 +76,8 @@ class Simulation_box:
         2) If no path is given (empty string), then a new Simulation_Box instance is created. The parameters M, L are taken from the call signature (either values are given or defaults as above). Positions and velocities generated randomly (see below).
         """
         if path:
-            self.M, self.L, self.positions, self.velocities, descSnap = self.loadSnapshot(path)
+            self.M, self.L, self.positions, self.velocities, descSnap = self.loadSnapshot(
+                path)
             if Name:
                 self.description = Name + ": " + descSnap
             else:
@@ -98,8 +104,8 @@ class Simulation_box:
         """Generate initial velocites based on a (3D) Gauß distribution with Mean = [0,0,0] and Variance = Sigma^2 in every component (Cov-Matrix diag matrix with Sigma^2 in diagonal)"""
         mean = np.ones(3)
         cov = numpy.sqrt(Sigma) * numpy.diag(mean, k=0)
-        return numpy.random.multivariate_normal(0 * mean, cov,
-                                                size=M)
+        return numpy.random.multivariate_normal(0 * mean, cov, size=M)
+
     @staticmethod
     def loadSnapshot(path, offset=0):
         """Load a snapshot from a text file in .xyz-format.
@@ -140,9 +146,9 @@ class Simulation_box:
         ret = self.loadSnapshot(path, offset=offset)
         if not ret:
             return False
-        (self.M, self.L, self.positions, self.velocities, self.description) = ret
+        (self.M, self.L, self.positions, self.velocities,
+         self.description) = ret
         return True
-
 
     @staticmethod
     def getNumLines(path):
@@ -151,7 +157,7 @@ class Simulation_box:
             num_lines = sum(1 for line in file)
             #num_lines = sum(1 for line in file if line.rstrip()) # alternative: strip empty lines
         return num_lines
-    
+
     def saveSnapshot(self, path="", mode="w"):
         """Save a snapshot (current positions and velocities in class instance) to a text file in .xyz-format.
         
@@ -175,13 +181,11 @@ class Simulation_box:
             numpy.savetxt(f, output, fmt='%e', delimiter=' ')
 
     @staticmethod
-    def saveSnapshotStatic(positions, velocities, M, L, description, path, mode):
+    def saveSnapshotStatic(positions, velocities, M, L, description, path,
+                           mode):
         """Staticmethod version of saveSnapshot"""
         with open(path, mode) as f:
-            header = [
-                str(M) + "\n", description + "\n",
-                str(L) + "\n"
-            ]
+            header = [str(M) + "\n", description + "\n", str(L) + "\n"]
             f.writelines(header)
             output = np.concatenate((positions, velocities), axis=1)
             numpy.savetxt(f, output, fmt='%e', delimiter=' ')
@@ -191,24 +195,31 @@ class Simulation_box:
 
         The method used for the minimizer is CG with gtol=1e-3*M (M...number of atoms). The minimizer is given the potential function Epot and its gradient grad_Epot.
         """
-        result = scipy.optimize.minimize(Epot_lj, self.positions.ravel(), jac=grad_Epot, method='CG', args=(self.L, self.M), options={'gtol': 1e-3*self.M})
+        result = minimize(Epot_lj,
+                          self.positions.ravel(),
+                          jac=grad_Epot,
+                          method='CG',
+                          args=(self.L, self.M),
+                          options={'gtol': 1e-3 * self.M})
         newPositions = result.x
         print("Optimizations successful: ", result.success)
         print("Message: ", result.message)
-        self.positions = newPositions.reshape(self.M,3)
+        self.positions = newPositions.reshape(self.M, 3)
         print("Sanity check: ", self.sanity_check(), "...should be [0, 0, 0].")
 
     def sanity_check(self):
         """Sanity check performed after minimization... conservation of momentum"""
-        return np.around(grad_Epot(self.positions.ravel(), self.L, self.M).reshape(self.M,3).sum(axis=0), decimals=6) # [sum(fx_i), sum(fy_i), sum(fz_i)]
+        return np.around(grad_Epot(self.positions.ravel(), self.L,
+                                   self.M).reshape(self.M, 3).sum(axis=0),
+                         decimals=6)  # [sum(fx_i), sum(fy_i), sum(fz_i)]
 
     def average_velocity(self):
         """Calculate average velocity of particles in the Simulation_Box"""
-        return self.velocities.sum(axis=0)/self.M
+        return self.velocities.sum(axis=0) / self.M
 
     def Ekin(self):
         """Calculate the kinetic energy of particles in the Simulation_Box"""
-        return 0.5*np.power(self.velocities, 2).sum()
+        return 0.5 * np.power(self.velocities, 2).sum()
 
     def toCOM(self):
         """Subtract the average velocity from all velocities... to Center Of Mass"""
@@ -216,4 +227,5 @@ class Simulation_box:
 
     def enforceMI(self):
         """Enforce the Minimum Image convention on all positions in the instance"""
-        return self.positions - self.L * np.around(self.positions/self.L, decimals=0)
+        return self.positions - self.L * np.around(self.positions / self.L,
+                                                   decimals=0)
