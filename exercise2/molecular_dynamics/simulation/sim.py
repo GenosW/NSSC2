@@ -132,7 +132,7 @@ class Simulation_box:
             #num_lines = sum(1 for line in file if line.rstrip()) # alternative: strip empty lines
         return num_lines
     
-    def saveSnapshot(self, path, mode):
+    def saveSnapshot(self, path="", mode="w"):
         with open(path, mode) as f:
             header = [
                 str(self.M) + "\n", self.description + "\n",
@@ -154,7 +154,7 @@ class Simulation_box:
             numpy.savetxt(f, output, fmt='%.4e', delimiter=' ')
 
     def moveToMinimumEnergy(self):
-        result = scipy.optimize.minimize(Epot_lj, self.positions.ravel(), jac=grad_Epot, method='CG', args=(self.L, self.M), options={'gtol': 5e-3})
+        result = scipy.optimize.minimize(Epot_lj, self.positions.ravel(), jac=grad_Epot, method='CG', args=(self.L, self.M), options={'gtol': 1e-3*self.M})
         newPositions = result.x
         print("Optimizations successful: ", result.success)
         print("Message: ", result.message)
@@ -162,7 +162,7 @@ class Simulation_box:
         print("Sanity check: ", self.sanity_check(), "...should be [0, 0, 0].")
 
     def sanity_check(self):
-        return np.around(grad_Epot(self.positions.ravel(), self.L, self.M).reshape(self.M,3).sum(axis=0), decimals=4) # (sum(fx_i), sum(fy_i), sum(fz_i))
+        return np.around(grad_Epot(self.positions.ravel(), self.L, self.M).reshape(self.M,3).sum(axis=0), decimals=6) # (sum(fx_i), sum(fy_i), sum(fz_i))
 
     def average_velocity(self):
         return self.velocities.sum(axis=0)/self.M
@@ -173,9 +173,8 @@ class Simulation_box:
     def toCOM(self):
         self.velocities = self.velocities - self.average_velocity()
 
-    @staticmethod
-    def enforceMI(positions, L):
-        return positions - L * np.around(positions/L, decimals=0)
+    def enforceMI(self):
+        return self.positions - self.L * np.around(self.positions/self.L, decimals=0)
 
 
 # class Trajectory:

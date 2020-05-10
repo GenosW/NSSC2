@@ -10,7 +10,6 @@ class Simulation_Analyzer:
         self.Ekins = []
         self.Etots = []
         self.sim = Simulation_box(path=path)
-        #self.calculateEnergies()
         
     def calculateEnergies(self):
         Epot = Epot_lj(self.sim.positions, self.sim.L, self.sim.M)
@@ -19,8 +18,6 @@ class Simulation_Analyzer:
         self.Epots.append(Epot)
         self.Ekins.append(Ekin)
         self.Etots.append(Etot)
-        # print(f"Epot = {Epot}")
-        # print(f"Ekin = {Ekin}")
 
     def analyze(self, path=None, num_samples=50, start=0., stop=1):
         if not path:
@@ -47,11 +44,11 @@ class Simulation_Analyzer:
             raise TypeError("There is something wrong with the input file...cannot analyze!")
 
         # <num_samples> samples evenly spaced on the intervall [0, L/2]
-        samples, dr = np.linspace(0, self.sim.L/2*np.sqrt(3), num=num_samples, retstep=True) 
+        samples, dr = np.linspace(0, self.sim.L/2, num=num_samples, retstep=True) 
         pcf = numpy.zeros_like(samples)
 
-        start_offset = int(start*num_snaps*lines_per_snap) # end of first 25%
-        stop_offset = stop*num_snaps*lines_per_snap # Sample number to stop at 
+        start_offset = int(start*num_snaps*lines_per_snap) # end of first 25% of frames
+        stop_offset = stop*num_snaps*lines_per_snap # Frame number to stop at 
         offset = 0
         j = 0
         # For the first 25%, we only calculate energies

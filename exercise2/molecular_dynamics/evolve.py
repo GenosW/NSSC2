@@ -28,13 +28,16 @@ if __name__ == "__main__":
     N = args.N
     name = args.name
 
-    outfile = "snapshots/trajectory_dt0,03.xyz"
-
-    M, L, positions, velocities, description = Simulation_box.loadSnapshot(inputPath)
-    Simulation_box.saveSnapshotStatic(positions, velocities, M, L, description, outfile, mode='w') # overwrite file
+    insert = str(dt).replace(".", ",")
+    outfile = "snapshots/trajectory_dt"+insert+"_p.xyz"
+    sim = Simulation_box(path=inputPath)
+    sim.loadSnapshotIntoBox(path=inputPath)
+    sim.saveSnapshot(path=outfile, mode='w') # overwrite file
+    sim.toCOM()
     for i in range(N-1):
-        positions, velocities = Verlet(positions, velocities, dt, M, L)
-        if i%10 == 0:
+        sim.positions, sim.velocities = Verlet(sim.positions, sim.velocities, dt, sim.M, sim.L)
+        if i%100 == 0:
             print(f"Step {i} done")
-            #positions = Simulation_box.enforceMI(positions, L)
-        Simulation_box.saveSnapshotStatic(positions, velocities, M, L, description, outfile, mode='a')
+            print("Avg vel:", sim.average_velocity())
+            sim.enforceMI()
+        sim.saveSnapshot(path=outfile, mode='a')
