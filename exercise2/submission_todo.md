@@ -32,4 +32,3 @@ Plots:
         - Plot PCF (scale by hand): dt = {0.001, 0.03}
         - Discuss its form
         - Epot=0: What changes? --> see WhatsApp
-        
