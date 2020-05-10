@@ -31,15 +31,8 @@ if __name__ == "__main__":
     print("L/2=", analysis.sim.L / 2)
     print("L/2*sqrt(3)=", analysis.sim.L / 2 * np.sqrt(3))
     print("Rest:", rest)
-    # print(y)
 
     dt = "0,03"
     analysis.savePCF(x, y, path="snapshots/pcf_dt"+dt+"_p.txt")
     analysis.saveEnergies(path="snapshots/energies_dt"+dt+"_p.txt")
 
-    # Plot the result
-    # fig = plt.figure()#figsize=(12.8,9.6), dpi=200,)
-    # plt.plot(x, y, 'r-x', label="density")
-    # plt.title("Volumetric density")
-    # plt.legend()
-    # plt.show()
