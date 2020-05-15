@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 '''init_md.py [M] [L] [Sigma]
 generates a ”relaxed” (i.e., low-energy) starting confguration for a molecular dynamics simulation.
 
@@ -50,11 +51,12 @@ if __name__ == "__main__":
     snapshotDir = "snapshots/"
     saveFile = snapshotDir + "init.xyz"
     print("Initial configuration will be saved at:", saveFile)
-    print("If the directory ./snapshots/ does not exist, it will be created...")
-    DirExists = isdir("./snapshots") 
+    print(
+        "If the directory ./snapshots/ does not exist, it will be created...")
+    DirExists = isdir("./snapshots")
     if not DirExists:
         mkdir("snapshots")
-        DirExists = isdir("./snapshots") 
+        DirExists = isdir("./snapshots")
         if not DirExists:
             exit("Couldnt create directory...")
 

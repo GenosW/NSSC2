@@ -1,3 +1,5 @@
+
+#!/usr/bin/env python
 import jax.numpy as np
 from jax import grad, jit
 import numpy
@@ -6,7 +8,7 @@ from argparse import ArgumentParser
 from simulation import Simulation_box, Simulation_Analyzer, Epot_lj, grad_Epot, Verlet
 # https://homepage.univie.ac.at/Franz.Vesely/simsp/dx/node17.html
 parser = ArgumentParser(description='plots a pcf.txt file')
-parser.add_argument('path', metavar='trajectory.xyz',type=str, help='a path to a trajectory file (.xyz);')
+parser.add_argument('path', metavar='pcf.txt',type=str, help='a path to a pcf file;', default="snapshots/pcf.txt")
 parser.add_argument('num', metavar='num',type=str, help='number of snaps analyzed --> take average')
 
 # Parse arguments
@@ -14,8 +16,8 @@ args = parser.parse_args()
 print(args)
 path = args.path
 num_snaps_analyzed = int(args.num)
-
-analyzer = Simulation_Analyzer("snapshots/trajectory_dt0,03_p.xyz")
+trajFile = path.replace("pcf", "trajectory")
+analyzer = Simulation_Analyzer(path=trajFile)
 r,y = analyzer.loadPCF(path)
 
 L = analyzer.sim.L
@@ -51,6 +53,6 @@ plt.ylabel("Volumetric density")
 plt.xlim((0,3.1))
 plt.legend()
 plt.grid()
-figpath = "snapshots/vol_dens_dt0,03p.png"
+figpath = path.replace("pcf", "vol_dens").replace("txt", "png") #"snapshots/vol_dens_dt0,03p.png"
 plt.savefig(figpath)
 print(f"Saved plot in <{figpath}")

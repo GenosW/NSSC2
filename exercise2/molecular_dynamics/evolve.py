@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 '''evolve.py [path] [dt] [N]
 takes an input initial situation and evolves from there using velocity Verlet algorithm
 
