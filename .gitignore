@@ -1,5 +1,6 @@
 .vscode
 .env
+*.ipynb_checkpoints
 jacobiMPI
 jacobiMPI2D
 jacobiSERIAL
