@@ -1,5 +1,9 @@
-function C_new = makeTimeStep_implicit(C, s)
+function C_new = makeTimeStep_implicit_CrankNicolson(C, s)
 
+    C_iminus1 = [C,0];
+    C_iplus1 = [0,C];
+    C = s*C_iminus1(1:end-1) + (1-2*s)*C + s*C_iplus1(2:end);
+    
     N = length(C);
     a = ones(1,N-1)*(1+2*s);
     a(1) = 1;

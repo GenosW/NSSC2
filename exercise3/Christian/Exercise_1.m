@@ -7,16 +7,18 @@ close all;
 h = 5;
 N = 100;
 dt = 0.00005;
-numberSteps = 100;
-makeVideo = true;
+numberSteps = 10000;
+makeVideo = false;
 
 dx = 1/(N-1);
 s = dt/dx^2;
 
 C = zeros(1,N);
 C(1) = 1;
-v = VideoWriter('concentration_1_1');
-open(v);
+if makeVideo
+    v = VideoWriter('concentration_1_1');
+    open(v);
+end
 
 for i = 1:numberSteps
     C = makeTimeStep_explicit(C,s,1);
@@ -41,7 +43,9 @@ for i = 1:numberSteps
     
 end
 
+try
 close(v);
+end
 
 C_analytic = analyticalSolution(N,1000,numberSteps*dt);
 figure
@@ -72,8 +76,10 @@ s = dt/dx^2;
 
 C = zeros(1,N);
 C(1) = 1;
-v = VideoWriter('concentration_1_2');
-open(v);
+if makeVideo
+    v = VideoWriter('concentration_1_2');
+    open(v);
+end
 
 for i = 1:numberSteps
     C = makeTimeStep_explicit(C,s,2);
@@ -95,7 +101,9 @@ for i = 1:numberSteps
     
 end
 
+try
 close(v);
+end
 
 figure
 plot(linspace(0,1,N), C)
@@ -121,23 +129,25 @@ dx = 1/(N-1);
 s = dt/dx^2;
 
 C = zeros(1,N);
-C_check = zeros(N,1);
+% C_check = zeros(N,1);
 C(1) = 1;
-C_check(1) = 1;
-v = VideoWriter('concentration_1_3');
-open(v);
-M = zeros(N);
-M(  1:1+N:N*N) = 1+2*s;
-M(N+1:1+N:N*N) = -s;
-M(  2:1+N:N*N-N) = -s;
-M(N-1,N-1) = 1+s;
-M(1,1) = 1;
-M(1,2) = 0;
-M = M(1:N-1,1:N-1);
+% C_check(1) = 1;
+if makeVideo
+    v = VideoWriter('concentration_1_3');
+    open(v);
+end
+% M = zeros(N);
+% M(  1:1+N:N*N) = 1+2*s;
+% M(N+1:1+N:N*N) = -s;
+% M(  2:1+N:N*N-N) = -s;
+% M(N-1,N-1) = 1+s;
+% M(1,1) = 1;
+% M(1,2) = 0;
+% M = M(1:N-1,1:N-1);
 for i = 1:numberSteps
     C = makeTimeStep_implicit(C,s);
-    C_check(1:end-1) = M\C_check(1:end-1);
-    C_check(end) = C_check(end-1);
+%     C_check(1:end-1) = M\C_check(1:end-1);
+%     C_check(end) = C_check(end-1);
     if makeVideo
         h = figure;
         set(h, 'Visible', 'off');
@@ -156,12 +166,14 @@ for i = 1:numberSteps
     
 end
 
+try
 close(v);
+end
 
 figure
 plot(linspace(0,1,N), C)
 hold on;
-plot(linspace(0,1,N),C_check, 'o')
+% plot(linspace(0,1,N),C_check, 'o')
 title('numerical solution 1.3')
 xlabel('Distance from source [-]')
 ylabel('Concentration [-]')
@@ -178,7 +190,7 @@ close all;
 h = 5;
 N = 100;
 dt = 0.00005;
-numberSteps = 1000;
+numberSteps = 10000;
 makeVideo = false;
 
 dx = 1/(N-1);
@@ -188,8 +200,10 @@ C = zeros(1,N);
 C_check = zeros(N,1);
 C(1) = 1;
 C_check(1) = 1;
-v = VideoWriter('concentration_1_4');
-open(v);
+if makeVideo
+    v = VideoWriter('concentration_1_4');
+    open(v);
+end
 M = zeros(N);
 M(  1:1+N:N*N) = 1+2*s;
 M(N+1:1+N:N*N) = -s;
@@ -200,7 +214,7 @@ M(1,2) = 0;
 M = M(1:N-1,1:N-1);
 
 for i = 1:numberSteps
-%     C = makeTimeStep_implicit(C,s);
+    C = makeTimeStep_implicit_CrankNicolson(C,s);
     C_check_iminus1 = [C_check;0];
     C_check_iplus1 = [0;C_check];
     C_check = s*C_check_iminus1(1:end-1) + (1-2*s)*C_check + s*C_check_iplus1(2:end);
@@ -224,10 +238,12 @@ for i = 1:numberSteps
     
 end
 
+try
 close(v);
+end
 
 figure
-% plot(linspace(0,1,N), C)
+plot(linspace(0,1,N), C)
 hold on;
 plot(linspace(0,1,N),C_check, 'o')
 title('numerical solution 1.4')
@@ -245,8 +261,8 @@ close all;
 h = 5;
 N = 101;
 dt = 0.01;
-numberSteps = 100;
-makeVideo = true;
+numberSteps = 10;
+makeVideo = false;
 
 dx = 1/(N-1);
 
@@ -257,8 +273,10 @@ for i = 0:1:100
     end
 end
 
-v = VideoWriter('concentration_2_1_rectangle');
-open(v);
+if makeVideo
+    v = VideoWriter('concentration_2_1_rectangle');
+    open(v);
+end
 
 C0 = dt/dx;
 for i = 1:numberSteps
@@ -282,7 +300,9 @@ for i = 1:numberSteps
     
 end
 
+try
 close(v);
+end
 
 figure
 plot(linspace(0,1,N), C, 'LineWidth',2)
@@ -299,8 +319,10 @@ ylim([-2 2])
 t = linspace(0,1,N);
 C = exp(-10.*(4.*t-1).^2);
 
-v = VideoWriter('concentration_2_1_gauss');
-open(v);
+if makeVideo
+    v = VideoWriter('concentration_2_1_gauss');
+    open(v);
+end
 
 C0 = dt/dx;
 for i = 1:numberSteps
@@ -324,7 +346,9 @@ for i = 1:numberSteps
     
 end
 
+try
 close(v);
+end
 
 figure
 plot(linspace(0,1,N), C, 'LineWidth',2)
