@@ -1,10 +1,10 @@
 function C_new = makeTimeStep_implicit(C, a, b, c)
 
-    n = length(C);
+    n = length(C)-1;
     alfa = zeros(1,n);
-    gamme = zeros(1,n);
+    gamma = zeros(1,n);
     v = zeros(1,n);
-    C_new = zeros(1,n);
+    C_new = zeros(1,n+1);
     
     alfa(1) = a(1);
     gamma(1) = c(1)/a(1);
@@ -22,7 +22,6 @@ function C_new = makeTimeStep_implicit(C, a, b, c)
         C_new(i) = v(i)-gamma(i)*C_new(i+1);
     end
     
-    C_new(1) = C(1);
     C_new(end) = C_new(end-1);
 
 end
