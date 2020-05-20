@@ -114,36 +114,30 @@ close all;
 h = 5;
 N = 100;
 dt = 0.00005;
-numberSteps = 100;
-makeVideo = true;
+numberSteps = 10000;
+makeVideo = false;
 
 dx = 1/(N-1);
 s = dt/dx^2;
 
 C = zeros(1,N);
-% C_check = zeros(N,1);
+C_check = zeros(N,1);
 C(1) = 1;
-% C_check(1) = 1;
+C_check(1) = 1;
 v = VideoWriter('concentration_1_3');
 open(v);
-% M = zeros(N);
-% M(  1:1+N:N*N) = 1+2*s;
-% M(N+1:1+N:N*N) = -s;
-% M(  2:1+N:N*N-N) = -s;
-% M(N-1,N-1) = 1+s;
-% M(1,1) = 1;
-% M(1,2) = 0;
-% M = M(1:N-1,1:N-1);
+M = zeros(N);
+M(  1:1+N:N*N) = 1+2*s;
+M(N+1:1+N:N*N) = -s;
+M(  2:1+N:N*N-N) = -s;
+M(N-1,N-1) = 1+s;
+M(1,1) = 1;
+M(1,2) = 0;
+M = M(1:N-1,1:N-1);
 for i = 1:numberSteps
-    a = ones(1,N-1)*(1+2*s);
-    a(1) = 1;
-    a(end) = 1+s;
-    b = ones(1,N-2)*(-s);
-    c = ones(1,N-2)*(-s);
-    c(1) = 0;
-    C = makeTimeStep_implicit(C,a,b,c);
-%     C_check(1:end-1) = M\C_check(1:end-1);
-%     C_check(end) = C_check(end-1);
+    C = makeTimeStep_implicit(C,s);
+    C_check(1:end-1) = M\C_check(1:end-1);
+    C_check(end) = C_check(end-1);
     if makeVideo
         h = figure;
         set(h, 'Visible', 'off');
@@ -167,8 +161,76 @@ close(v);
 figure
 plot(linspace(0,1,N), C)
 hold on;
-% plot(linspace(0,1,N),C_check, 'o')
+plot(linspace(0,1,N),C_check, 'o')
 title('numerical solution 1.3')
+xlabel('Distance from source [-]')
+ylabel('Concentration [-]')
+xlim([0 1])
+ylim([0 1])
+
+
+%% Exercise 1.4
+
+clear all;
+clc;
+close all;
+
+h = 5;
+N = 100;
+dt = 0.00005;
+numberSteps = 1000;
+makeVideo = false;
+
+dx = 1/(N-1);
+s = dt/dx^2;
+
+C = zeros(1,N);
+C_check = zeros(N,1);
+C(1) = 1;
+C_check(1) = 1;
+v = VideoWriter('concentration_1_4');
+open(v);
+M = zeros(N);
+M(  1:1+N:N*N) = 1+2*s;
+M(N+1:1+N:N*N) = -s;
+M(  2:1+N:N*N-N) = -s;
+M(N-1,N-1) = 1+s;
+M(1,1) = 1;
+M(1,2) = 0;
+M = M(1:N-1,1:N-1);
+
+for i = 1:numberSteps
+%     C = makeTimeStep_implicit(C,s);
+    C_check_iminus1 = [C_check;0];
+    C_check_iplus1 = [0;C_check];
+    C_check = s*C_check_iminus1(1:end-1) + (1-2*s)*C_check + s*C_check_iplus1(2:end);
+    C_check(1:end-1) = M\C_check(1:end-1);
+    C_check(end) = C_check(end-1);
+    if makeVideo
+        h = figure;
+        set(h, 'Visible', 'off');
+        plot(linspace(0,1,N), C, 'LineWidth', 2)
+        grid on;
+        title('numerical solution 1.4')
+        xlabel('Distance from source [-]')
+        ylabel('Concentration [-]')
+        xlim([0 1])
+        ylim([0 1])
+
+        frame = getframe(gcf);
+        writeVideo(v,frame);
+        close;
+    end
+    
+end
+
+close(v);
+
+figure
+% plot(linspace(0,1,N), C)
+hold on;
+plot(linspace(0,1,N),C_check, 'o')
+title('numerical solution 1.4')
 xlabel('Distance from source [-]')
 ylabel('Concentration [-]')
 xlim([0 1])
