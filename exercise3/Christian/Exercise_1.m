@@ -6,9 +6,9 @@ close all;
 
 h = 5;
 N = 100;
-dt = 0.00005;
+dt = 0.00004;
 numberSteps = 10000;
-makeVideo = false;
+makeVideo = true;
 
 dx = 1/(N-1);
 s = dt/dx^2;
@@ -23,13 +23,18 @@ end
 for i = 1:numberSteps
     C = makeTimeStep_explicit(C,s,1);
     
-    if makeVideo
-        C_analytic = analyticalSolution(N,1000,i*dt);
+    if makeVideo & mod(i,30)==0
+        C_analytic = analyticalSolution(N,100,i*dt);
         h = figure;
         set(h, 'Visible', 'off');
-        plot(linspace(0,1,N), C)
+        plot(linspace(0,1,N), C, '-o')
         hold on;
-        plot(linspace(0,1,N), C_analytic, 'o')
+        plot(linspace(0,1,N), C_analytic)
+        dim = [0.68 0.5 0.3 0.3];
+        str = {['dt: ' num2str(dt)], ['Steps: ' num2str(numberSteps)], ['s: ' num2str(s)]};
+        annotation('textbox',dim,'String',str,'FitBoxToText','on');
+        grid on;
+        legend('Numerical Solution', 'Analytical Solution (n=100)','Location','northeast')
         title('numerical vs analytical solution 1.1')
         xlabel('Distance from source [-]')
         ylabel('Concentration [-]')
@@ -47,11 +52,16 @@ try
 close(v);
 end
 
-C_analytic = analyticalSolution(N,1000,numberSteps*dt);
+C_analytic = analyticalSolution(N,100,numberSteps*dt);
 figure
-plot(linspace(0,1,N), C)
+plot(linspace(0,1,N), C, '-o')
 hold on;
-plot(linspace(0,1,N), C_analytic, 'o')
+plot(linspace(0,1,N), C_analytic)
+dim = [0.68 0.5 0.3 0.3];
+str = {['dt: ' num2str(dt)], ['Steps: ' num2str(numberSteps)], ['s: ' num2str(s)]};
+annotation('textbox',dim,'String',str,'FitBoxToText','on');
+grid on;
+legend('Numerical Solution', 'Analytical Solution (n=100)','Location','northeast')
 title('numerical vs analytical solution 1.1')
 xlabel('Distance from source [-]')
 ylabel('Concentration [-]')
