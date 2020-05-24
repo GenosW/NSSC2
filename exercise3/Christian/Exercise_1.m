@@ -7,8 +7,8 @@ close all;
 h = 5;
 N = 100;
 dt = 0.00004;
-numberSteps = 10000;
-makeVideo = true;
+numberSteps = 1000;
+makeVideo = false;
 
 dx = 1/(N-1);
 s = dt/dx^2;
@@ -68,6 +68,10 @@ ylabel('Concentration [-]')
 xlim([0 1])
 ylim([0 1])
 
+% error plot
+error = abs(C-C_analytic);
+figure
+plot(linspace(0,1,N), error, '-or');
 
 %% Exercise 1.2
 
@@ -143,8 +147,8 @@ close all;
 
 h = 5;
 N = 100;
-dt = 0.00005;
-numberSteps = 1000;
+dt = 0.00004;
+numberSteps = 100;
 makeVideo = false;
 
 dx = 1/(N-1);
@@ -208,6 +212,11 @@ ylabel('Concentration [-]')
 xlim([0 1])
 ylim([0 1])
 
+% error plot
+error = abs(C-C_analytic);
+figure
+plot(linspace(0,1,N), error, '-or');
+
 
 %% Exercise 1.4
 
@@ -216,16 +225,16 @@ clc;
 close all;
 
 h = 5;
-N = 100;
-dt = 0.00005;
-numberSteps = 10000;
+N = 10;
+dt = 0.00004;
+numberSteps = 100;
 makeVideo = false;
 
 dx = 1/(N-1);
 s = dt/dx^2;
 
 C = zeros(1,N);
-C_check = zeros(N,1);
+C_check = zeros(1,N);
 C(1) = 1;
 C_check(1) = 1;
 if makeVideo
@@ -243,11 +252,12 @@ M = M(1:N-1,1:N-1);
 
 for i = 1:numberSteps
     C = makeTimeStep_implicit_CrankNicolson(C,s);
-    C_check_iminus1 = [C_check;0];
-    C_check_iplus1 = [0;C_check];
-    C_check = s*C_check_iminus1(1:end-1) + (1-2*s)*C_check + s*C_check_iplus1(2:end);
-    C_check(1:end-1) = M\C_check(1:end-1);
+    C_check_iminus1 = [0,C_check(1:end-1)];
+    C_check_iplus1 = [C_check(2:end),0];
+    C_check = s*C_check_iminus1 + (1-2*s)*C_check + s*C_check_iplus1;
+    C_check(1:end-1) = M\C_check(1:end-1)';
     C_check(end) = C_check(end-1);
+    C_check(1) = 1;
     if makeVideo
         h = figure;
         set(h, 'Visible', 'off');
@@ -270,15 +280,26 @@ try
 close(v);
 end
 
+C_analytic = analyticalSolution(N,100,numberSteps*dt);
 figure
-plot(linspace(0,1,N), C)
+plot(linspace(0,1,N), C_check, '-o')
 hold on;
-plot(linspace(0,1,N),C_check, 'o')
-title('numerical solution 1.4')
+plot(linspace(0,1,N), C_analytic)
+dim = [0.68 0.5 0.3 0.3];
+str = {['dt: ' num2str(dt)], ['Steps: ' num2str(numberSteps)], ['s: ' num2str(s)]};
+annotation('textbox',dim,'String',str,'FitBoxToText','on');
+grid on;
+legend('Numerical Solution', 'Analytical Solution (n=100)','Location','northeast')
+title('numerical vs analytical solution 1.4')
 xlabel('Distance from source [-]')
 ylabel('Concentration [-]')
 xlim([0 1])
 ylim([0 1])
+
+% error plot
+error = abs(C_check-C_analytic);
+figure
+plot(linspace(0,1,N), error, '-or');
 
 %% Exercise 2.1
 

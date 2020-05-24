@@ -1,8 +1,10 @@
 function C_new = makeTimeStep_implicit_CrankNicolson(C, s)
 
-    C_iminus1 = [C,0];
-    C_iplus1 = [0,C];
-    C = s*C_iminus1(1:end-1) + (1-2*s)*C + s*C_iplus1(2:end);
+    C_iminus1 = [0,C(1:end-1)];
+    C_iplus1 = [C(2:end),0];
+    C = s*C_iminus1 + (1-2*s)*C + s*C_iplus1;
+    %C(1) = 1;
+    
     
     N = length(C);
     a = ones(1,N-1)*(1+2*s);
@@ -35,5 +37,6 @@ function C_new = makeTimeStep_implicit_CrankNicolson(C, s)
     end
     
     C_new(end) = C_new(end-1);
+    C_new(1) = 1;
 
 end
