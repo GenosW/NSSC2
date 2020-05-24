@@ -1,7 +1,7 @@
 function plotConcentration(x, C, sim_params, C_ana)
 
 plotAna = false;
-if ~exist('C_ana','var')
+if exist('C_ana','var')
     % third parameter does not exist, so default it to something
     plotAna = true;
 end
