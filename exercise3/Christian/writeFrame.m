@@ -9,7 +9,7 @@ end
 % Unpack sim_params-structure
 h = sim_params.h; N = sim_params.N;
 dt = sim_params.dt; dx = sim_params.dx; s = sim_params.s; 
-numberSteps = sim_params.numberSteps;
+numberSteps = sim_params.numberSteps; plt_title = sim_params.plt_title;
 
 fig = figure;
 set(fig, 'Visible', 'off');
@@ -23,7 +23,7 @@ str = {['step: ' i], ['dt: ' num2str(dt)], ['Steps: ' num2str(numberSteps)], ['s
 annotation('textbox',dim,'String',str,'FitBoxToText','on');
 grid on;
 legend('Numerical Solution', 'Analytical Solution (n=100)','Location','northeast')
-title('numerical vs analytical solution 1.1')
+title(plt_title)
 xlabel('Distance from source [-]')
 ylabel('Concentration [-]')
 xlim([0 h])

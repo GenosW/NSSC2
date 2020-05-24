@@ -7,7 +7,7 @@ if ~exist('C_ana','var')
 end
 
 h = sim_params.h; N = sim_params.N; numberSteps = sim_params.numberSteps;
-dt = sim_params.dt; s = sim_params.s;
+dt = sim_params.dt; s = sim_params.s; plt_title = sim_params.plt_title;
 
 figure
 plot(x, C, '-o')
@@ -20,7 +20,7 @@ str = {['dt: ' num2str(dt)], ['Steps: ' num2str(numberSteps)], ['s: ' num2str(s)
 annotation('textbox',dim,'String',str,'FitBoxToText','on');
 grid on;
 legend('Numerical Solution', 'Analytical Solution (n=100)','Location','northeast')
-title('numerical vs analytical solution 1.1')
+title(plt_title)
 xlabel('Distance from source [-]')
 ylabel('Concentration [-]')
 xlim([0 h])
