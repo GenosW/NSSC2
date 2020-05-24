@@ -144,7 +144,7 @@ close all;
 h = 5;
 N = 100;
 dt = 0.00005;
-numberSteps = 10000;
+numberSteps = 1000;
 makeVideo = false;
 
 dx = 1/(N-1);
@@ -192,11 +192,17 @@ try
 close(v);
 end
 
+C_analytic = analyticalSolution(N,100,numberSteps*dt);
 figure
-plot(linspace(0,1,N), C)
+plot(linspace(0,1,N), C, '-o')
 hold on;
-% plot(linspace(0,1,N),C_check, 'o')
-title('numerical solution 1.3')
+plot(linspace(0,1,N), C_analytic)
+dim = [0.68 0.5 0.3 0.3];
+str = {['dt: ' num2str(dt)], ['Steps: ' num2str(numberSteps)], ['s: ' num2str(s)]};
+annotation('textbox',dim,'String',str,'FitBoxToText','on');
+grid on;
+legend('Numerical Solution', 'Analytical Solution (n=100)','Location','northeast')
+title('numerical vs analytical solution 1.3')
 xlabel('Distance from source [-]')
 ylabel('Concentration [-]')
 xlim([0 1])
