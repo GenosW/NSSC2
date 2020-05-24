@@ -77,9 +77,9 @@ close all;
 
 h = 5;
 N = 100;
-dt = 0.00005;
+dt = 0.00004;
 numberSteps = 10000;
-makeVideo = false;
+makeVideo = true;
 
 dx = 1/(N-1);
 s = dt/dx^2;
@@ -94,10 +94,16 @@ end
 for i = 1:numberSteps
     C = makeTimeStep_explicit(C,s,2);
     
-    if makeVideo
+    if makeVideo & mod(i,30)==0
         h = figure;
         set(h, 'Visible', 'off');
-        plot(linspace(0,1,N), C)
+        plot(linspace(0,1,N), C, '-o')
+        hold on;
+        dim = [0.68 0.5 0.3 0.3];
+        str = {['dt: ' num2str(dt)], ['Steps: ' num2str(numberSteps)], ['s: ' num2str(s)]};
+        annotation('textbox',dim,'String',str,'FitBoxToText','on');
+        grid on;
+        legend('Numerical Solution', 'Location', 'northeast')
         title('numerical solution 1.2')
         xlabel('Distance from source [-]')
         ylabel('Concentration [-]')
@@ -116,7 +122,13 @@ close(v);
 end
 
 figure
-plot(linspace(0,1,N), C)
+plot(linspace(0,1,N), C, '-o')
+hold on;
+dim = [0.68 0.5 0.3 0.3];
+str = {['dt: ' num2str(dt)], ['Steps: ' num2str(numberSteps)], ['s: ' num2str(s)]};
+annotation('textbox',dim,'String',str,'FitBoxToText','on');
+grid on;
+legend('Numerical Solution', 'Location', 'northeast')
 title('numerical solution 1.2')
 xlabel('Distance from source [-]')
 ylabel('Concentration [-]')

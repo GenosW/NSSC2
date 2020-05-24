@@ -97,7 +97,13 @@ for i = 1:numberSteps
     if makeVideo
         h = figure;
         set(h, 'Visible', 'off');
-        plot(linspace(0,1,N), C)
+        plot(linspace(0,1,N), C, '-o')
+        hold on;
+        dim = [0.68 0.5 0.3 0.3];
+        str = {['dt: ' num2str(dt)], ['Steps: ' num2str(numberSteps)], ['s: ' num2str(s)]};
+        annotation('textbox',dim,'String',str,'FitBoxToText','on');
+        grid on;
+        legend('Numerical Solution', 'Location', 'northeast')
         title('numerical solution 1.2')
         xlabel('Distance from source [-]')
         ylabel('Concentration [-]')
@@ -116,7 +122,13 @@ close(v);
 end
 
 figure
-plot(linspace(0,1,N), C)
+plot(linspace(0,1,N), C, '-o')
+hold on;
+dim = [0.68 0.5 0.3 0.3];
+str = {['dt: ' num2str(dt)], ['Steps: ' num2str(numberSteps)], ['s: ' num2str(s)]};
+annotation('textbox',dim,'String',str,'FitBoxToText','on');
+grid on;
+legend('Numerical Solution', 'Location', 'northeast')
 title('numerical solution 1.2')
 xlabel('Distance from source [-]')
 ylabel('Concentration [-]')
