@@ -23,7 +23,7 @@ if plotAna
     plot(x, C_ana)
 end
 dim = [0.68 0.5 0.3 0.3];
-str = {['step: ' i], ['dt: ' num2str(dt)], ['Steps: ' num2str(numberSteps)], ['s: ' num2str(s)]};
+str = {['step: ' num2str(i)], ['dt: ' num2str(dt)], ['Steps: ' num2str(numberSteps)], ['s: ' num2str(s)]};
 annotation('textbox',dim,'String',str,'FitBoxToText','on');
 grid on;
 legend('Numerical Solution', 'Analytical Solution (n=100)','Location','northeast')
