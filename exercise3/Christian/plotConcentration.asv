@@ -5,10 +5,8 @@ if exist('C_ana','var')
     % third parameter does not exist, so default it to something
     plotAna = true;
 end
-ylimits = [0 1];
 if exist('lim','var')
-    ylimits = lim;
-end
+    
 
 h = sim_params.h; N = sim_params.N; numberSteps = sim_params.numberSteps;
 dt = sim_params.dt; s = sim_params.s; plt_title = sim_params.plt_title;
@@ -28,5 +26,5 @@ title(plt_title)
 xlabel('Distance from source [-]')
 ylabel('Concentration [-]')
 xlim([0 h])
-ylim(ylimits)
+ylim([0 1])
 end

@@ -1,10 +1,14 @@
-function writeFrame(v, C, x, i, sim_params, C_ana)
+function writeFrame(v, C, x, i, sim_params, C_ana, lim)
 %WRITEFRAME Summary of this function goes here
 %   Detailed explanation goes here
 plotAna = false;
-if ~exist('C_ana','var')
+if exist('C_ana','var')
     % third parameter does not exist, so default it to something
     plotAna = true;
+end
+ylimits = [0 1];
+if exist('lim','var')
+    ylimits = lim;
 end
 % Unpack sim_params-structure
 h = sim_params.h; N = sim_params.N;
@@ -27,7 +31,7 @@ title(plt_title)
 xlabel('Distance from source [-]')
 ylabel('Concentration [-]')
 xlim([0 h])
-ylim([0 1])
+ylim(ylimits)
 
 frame = getframe(gcf);
 writeVideo(v,frame);
