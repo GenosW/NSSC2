@@ -8,17 +8,17 @@ function new = makeTimeStep_implicit_new(old, n, a, b, c)
     new(1) = old(1);%/a(1);
     
     % Forwad 
-    for i = 2:n-1
+    for i = 2:n
         alfa(i) = a(i)-b(i)*gamma(i-1);
         gamma(i) = c(i)/alfa(i);
         new(i) = ( old(i) - b(i)*new(i-1) )/alfa(i);
     end
 
     % Backward
-    for i = n-2:-1:1
+    for i = n-1:-1:1
         new(i) = new(i)-gamma(i)*new(i+1);
     end
     % hom Neumann BC
-    new(n) = new(n-1);
+    %new(n) = new(n-1);
 
 end

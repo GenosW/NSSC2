@@ -14,7 +14,7 @@ C_new = zeros(1,N);
 % NEW
 C_new(2:end-1) = s*C_iminus1 + 2*(1-s)*C(2:end-1) + s*C_iplus1;
 C_new(1) = C(1); % Dirichlet
-C_new(end) = C(end-1); % Neumann
+C_new(end) = 2*s*C(end-1) + 2*(1-s)*C(end); % Neumann
 
 C_new = makeTimeStep_implicit_new(C_new, N, a, b, c);
 end
