@@ -1,5 +1,6 @@
 .vscode
 .env
+.fem
 *.ipynb_checkpoints
 *.avi
 jacobiMPI
