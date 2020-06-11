@@ -6,15 +6,18 @@ import matplotlib.pyplot as plt
 
 class Element:
     """
-    This is an element for a FEM.
+    This is an triangular element for a FEM.
     """
     def __init__(self,coordinates,nodes,ID,k,h):
         """
-        This is the constructor for element.
-        coordinates... coordinates
-        
-        Hi from Peter!
+        constructor for element
+        coordinates... pair of coordinates for 1., 2. and 3. node
+	nodes... node numbers for 1., 2. and 3. element node in the global system
+	ID... number of element
+	k... heat coefficient
+	h... height of element
         """
+
         self.ID = ID
         self.node1 = np.array([coordinates[0,0], coordinates[0,1], nodes[0]])
         self.node2 = np.array([coordinates[1,0], coordinates[1,1], nodes[1]])

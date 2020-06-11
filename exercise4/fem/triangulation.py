@@ -3,10 +3,21 @@ import matplotlib.pyplot as plt
 from .element import Element
 from .mesh import Mesh
 
+# elements to be modified as given in exercise handout
 elementsDefault = [61, 62, 63, 64, 65, 66, 67, 68, 79, 80, 81, 82, 83, 84, 85, 97, 98, 99, 100, 101, 115, 116, 117, 118]
 
 class Triangulation:
     def __init__(self,L,numberElementsX,numberElementsY,k,h,mode = 0,factorV1 = 1, c=1):
+	"""
+	L... length of square domain
+	numberElementsX / Y... how many elements in x and y direction
+	k... heat coefficient
+	h... height of the domain
+	mode... 0=base calculation, 1=Variation 1 etc
+	factorV1... how much of its original length is upper edge of domain, used for trapezoidal mesh, can be used in any mode though
+	c... modifies k of elements in elements_to_be_modified with k=k*c when used in mode 4
+	"""
+
         self.L = L
         self.numberElementsX = numberElementsX
         self.numberElementsY = numberElementsY

@@ -3,6 +3,14 @@ import matplotlib.pyplot as plt
 
 class Mesh:
     def __init__(self,elements,numberElementsX,numberElementsY,L,coords):
+	"""
+	constructor of mesh
+	elements... list of elements which build up the mesh
+	numberElementsX / Y... how many elements there are in x and y direction
+	L... length of square domain
+	coords... coordinates of nodes in ascending order, used for plotting
+	"""
+
         self.elements = elements
         self.numberNodes = (numberElementsX+1)*(numberElementsY+1)
         self.numberElementsX = numberElementsX
@@ -22,6 +30,10 @@ class Mesh:
             plt.text(e.center[0],e.center[1],e.ID)
         
     def assembleH(self):
+	"""
+	assembles the global stiffness matrix
+	"""
+
         H = np.zeros((self.numberNodes,self.numberNodes))
         for e in self.elements:
             for m in range(3):
