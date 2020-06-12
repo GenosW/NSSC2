@@ -2,6 +2,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 import os
 
+
+overdrawFactor = 0.05
+
 class Mesh:
     def __init__(self,elements,numberElementsX,numberElementsY,L,coords, plotDir="./plots"):
         """
@@ -97,16 +100,20 @@ class Mesh:
             minArrow, maxArrow = min(M), max(M)
             if maxArrow - minArrow < 1e-4*maxArrow:
                 minArrow = int(minArrow*1e-3)*1e3
-            print(f"color_scale: {minArrow} - {maxArrow}")
+            print(f"Temperature gradient - color_scale: {minArrow} - {maxArrow}")
             plt.clim(minArrow,maxArrow)
         else:
-            assert(isinstance(scaleArrowColor, tuple))
-            assert(len(scaleArrowColor)==2)
+            assert isinstance(scaleArrowColor, tuple), "scaleArrowColor: Please use a tuple like (min, max)!"
+            assert len(scaleArrowColor)==2, "scaleArrowColor: Please use a tuple like (min, max)!"
+            print(f"Temperature gradient - color_scale: {scaleArrowColor[0]} - {scaleArrowColor[1]}")
+            plt.clim(*scaleArrowColor)
         plt.colorbar(image, cmap=plt.cm.jet, label="Temperature [K]", spacing=barSpacing, format="%1.2e")#, ticks=cbticks)
         fig.set_size_inches(18.5, 10.5, forward=True)
         ax.set_title('Temperature Gradient')
         ax.set_xlabel('x [m]')
         ax.set_ylabel('y [m]')
+        ax.set_xlim((0-self.L*overdrawFactor, self.L*(1+overdrawFactor)))
+        ax.set_ylim((0-self.L*overdrawFactor, self.L*(1+overdrawFactor)))
         if saveFig:
             saveName = os.path.join(self._plotDir, name + '_TemperatureGradient.png')
             plt.savefig(saveName)
@@ -127,16 +134,20 @@ class Mesh:
             minArrow, maxArrow = min(M), max(M)
             if maxArrow - minArrow < 1e-4*maxArrow:
                 minArrow = int(minArrow*1e-3)*1e3
-            print(f"color_scale: {minArrow} - {maxArrow}")
+            print(f"Flux color_scale: {minArrow} - {maxArrow}")
             plt.clim(minArrow,maxArrow)
         else:
-            assert(isinstance(scaleArrowColor, tuple))
-            assert(len(scaleArrowColor)==2)
+            assert isinstance(scaleArrowColor, tuple), "scaleArrowColor: Please use a tuple like (min, max)!"
+            assert len(scaleArrowColor)==2, "scaleArrowColor: Please use a tuple like (min, max)!"
+            print(f"Flux gradient - color_scale: {scaleArrowColor[0]} - {scaleArrowColor[1]}")
+            plt.clim(*scaleArrowColor)
         plt.colorbar(image, cmap=plt.cm.jet, label="Flux [W/m²]", spacing=barSpacing, format="%1.2e")#, ticks=cbticks)
         fig.set_size_inches(18.5, 10.5, forward=True)
         ax.set_title('Flux')
         ax.set_xlabel('x [m]')
         ax.set_ylabel('y [m]')
+        ax.set_xlim((0-self.L*overdrawFactor, self.L*(1+overdrawFactor)))
+        ax.set_ylim((0-self.L*overdrawFactor, self.L*(1+overdrawFactor)))
         if saveFig:
             saveName = os.path.join(self._plotDir, name + '_Flux.png')
             plt.savefig(saveName)
