@@ -1,0 +1,5 @@
+\contentsline {section}{\numberline {1}Task 1: Questions}{1}%
+\contentsline {section}{\numberline {2}Task 2: 1D Decomposition}{2}%
+\contentsline {subsection}{\numberline {2.1}Description}{2}%
+\contentsline {section}{\numberline {3}Task 3: Single-Precision Data Representation}{3}%
+\contentsline {section}{\numberline {4}Task 4: 1D Decomposition}{4}%

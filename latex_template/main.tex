@@ -8,13 +8,18 @@
 \usepackage{amsfonts}
 \usepackage{amsmath}
 \usepackage{graphicx}
-\usepackage{subfigure}
+\usepackage{import}
 \usepackage{color}
 \usepackage{abstract}
 \usepackage{float}
+\usepackage{subfig}
 \usepackage[toc,page]{appendix}
 \usepackage{listings}
 %\lstset{language=C++}
+
+\DeclareUnicodeCharacter{2212}{-}
+\graphicspath{ {./images/} } % Sets path to folder with images/figures
+
 
 \DeclareUnicodeCharacter{2212}{-}
 \newcommand{\overbar}[1]{\mkern 1.5mu\overline{\mkern-1.5mu#1\mkern-1.5mu}\mkern 1.5mu}
@@ -28,7 +33,7 @@
 \begin{titlepage}
 	\centering
 	\begin{center}
-	\includegraphics[width=6cm]{Bilder/IuE-Logo.png}
+	\includegraphics[width=6cm]{IuE-Logo.png}
 	\end{center}
 	{\scshape\LARGE INSTITUTE OF MICROELECTRONICS\par}
 	\vspace{1cm}

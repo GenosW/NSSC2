@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import math
 from .element import Element
 from .mesh import Mesh
 
