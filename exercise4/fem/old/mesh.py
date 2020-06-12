@@ -1,9 +1,8 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import os
 
 class Mesh:
-    def __init__(self,elements,numberElementsX,numberElementsY,L,coords, plotDir="./plots"):
+    def __init__(self,elements,numberElementsX,numberElementsY,L,coords):
         """
         constructor of mesh
         elements... list of elements which build up the mesh
@@ -11,17 +10,12 @@ class Mesh:
         L... length of square domain
         coords... coordinates of nodes in ascending order, used for plotting
         """
-
         self.elements = elements
         self.numberNodes = (numberElementsX+1)*(numberElementsY+1)
         self.numberElementsX = numberElementsX
         self.numberElementsY = numberElementsY
         self.L = L
         self.coords = coords
-        if not os.path.isdir(plotDir):
-            os.mkdir(plotDir)
-            print(f"Created {plotDir}")
-        self.plotDir = plotDir
         
     def drawMesh(self,number):
         for e in self.elements:
@@ -49,7 +43,7 @@ class Mesh:
     def storeT(self,T):
         self.T = T
         
-    def plotTemperatureField(self, name, numbers=False, saveFig=True):
+    def plotTemperatureField(self,numbers=False):
         fig,ax=plt.subplots(1,1)
         fig.set_size_inches(18.5, 10.5, forward=True)
         self.drawMesh(numbers)
@@ -58,9 +52,6 @@ class Mesh:
         ax.set_ylabel('y [m]')
         cp = plt.tricontourf(self.coords[0],self.coords[1],np.squeeze(self.T),20,cmap='jet')
         fig.colorbar(cp)
-        if saveFig:
-            saveName = os.path.join(self.plotDir, name + '_TemperatureField.png')
-            plt.savefig(saveName)
 
         
     def calculateTempGradient(self):
@@ -72,7 +63,7 @@ class Mesh:
         for e in self.elements:
             e.flux = np.array([e.tempGrad[0]*(-e.k), e.tempGrad[1]*(-e.k)])
             
-    def plotTemperatureGradient(self,name, saveFig=True):
+    def plotTemperatureGradient(self):
         fig,ax=plt.subplots(1,1)
         self.drawMesh(False)
         plt.tricontourf(self.coords[0],self.coords[1],np.squeeze(self.T),20,cmap='jet',alpha=0.2)
@@ -93,11 +84,8 @@ class Mesh:
         ax.set_title('Temperature Gradient')
         ax.set_xlabel('x [m]')
         ax.set_ylabel('y [m]')
-        if saveFig:
-            saveName = os.path.join(self.plotDir, name + '_TemperatureGradient.png')
-            plt.savefig(saveName)
         
-    def plotFlux(self,name, saveFig=True):
+    def plotFlux(self):
         fig,ax=plt.subplots(1,1)
         self.drawMesh(False)
         plt.tricontourf(self.coords[0],self.coords[1],np.squeeze(self.T),20,cmap='jet',alpha=0.2)
@@ -118,6 +106,5 @@ class Mesh:
         ax.set_title('Flux')
         ax.set_xlabel('x [m]')
         ax.set_ylabel('y [m]')
-        if saveFig:
-            saveName = os.path.join(self.plotDir, name + '_Flux.png')
-            plt.savefig(saveName)
+        
+    

@@ -1,3 +1,6 @@
+"""
+This is the element module. The Element class is defined here.
+"""
 import numpy as np
 import matplotlib.pyplot as plt
 
