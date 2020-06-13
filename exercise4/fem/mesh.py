@@ -110,6 +110,7 @@ class Mesh:
                                 scaleArrowColor: tuple = None,
                                 overdraw=overdrawFactor):
         fig, ax = plt.subplots(1, 1)
+        fig.set_size_inches(18.5, 10.5, forward=True)
         self.drawMesh(False)
         plt.tricontourf(self.coords[0],
                         self.coords[1],
@@ -169,6 +170,7 @@ class Mesh:
                  scaleArrowColor: tuple = None,
                  overdraw=overdrawFactor):
         fig, ax = plt.subplots(1, 1)
+        fig.set_size_inches(18.5, 10.5, forward=True)
         self.drawMesh(False)
         plt.tricontourf(self.coords[0],
                         self.coords[1],

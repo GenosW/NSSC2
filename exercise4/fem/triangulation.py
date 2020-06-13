@@ -60,19 +60,12 @@ class Triangulation:
                            i] = i * x * (1 - j * f)
                     if (self.mode == 2):
                         B = j * y / (2 * self.L)
-                        coords[0, j * (self.numberElementsX + 1) + i] = coords[
-                            0, j * (self.numberElementsX + 1) + i] * (
-                                B / self.L *
-                                coords[0, j *
-                                       (self.numberElementsX + 1) + i] - B + 1)
+                        coords[0, j * (self.numberElementsX + 1) + i] = coords[0, j * (self.numberElementsX + 1) + i] * (
+                            B / self.L * coords[0, j * (self.numberElementsX + 1) + i] - B + 1)
                     coords[1, j * (self.numberElementsX + 1) + i] = j * y
                     if (self.mode == 3):
-                        coords[0, j * (self.numberElementsX + 1) +
-                               i], coords[1, j * (self.numberElementsX + 1) +
-                                          i] = self.rotate(
-                                              i * x * (1 - j * f), 0,
-                                              self.L * 2, 0, -math.pi / 4 /
-                                              self.numberElementsY * j)
+                        coords[0, j * (self.numberElementsX + 1) + i], coords[1, j * (self.numberElementsX + 1) + i] = self.rotate(i 
+                                * x * (1 - j * f), 0, self.L * 2, 0, -math.pi / 4 / self.numberElementsY * j)
             for j in np.arange(self.numberElementsY):
                 for i in np.arange(self.numberElementsX):
                     nodesLower = np.array([
