@@ -24,7 +24,6 @@ def print_HTP(H, T, P, filename="output.txt"):
             outline = "{0:+8.4e},".format(col)
             F.write("{0:11s} \n".format(str(outline)))
 
-
     F.write("Force vector P: \n")
     for row in P:
         for col in row:
